@@ -47,17 +47,33 @@ class StreamingConsumer:
     def consume_records(self, max_records: int | None = None) -> Generator[MetricRecord, None, None]:
         """Consume and yield validated MetricRecord objects."""
         count = 0
-        for msg in self.consumer:
-            data = msg.value
-            record = MetricRecord.model_validate(data)
-            count += 1
-            yield record
-            if max_records and count >= max_records:
+        start_time = time.time()
+        timeout_sec = 6.0
+        while True:
+            try:
+                msg_dict = self.consumer.poll(timeout_ms=1000, max_records=max_records or 100)
+            except Exception:
                 break
+            if not msg_dict:
+                if time.time() - start_time > timeout_sec:
+                    break
+                continue
+            start_time = time.time()
+            for _tp, msgs in msg_dict.items():
+                for msg in msgs:
+                    data = msg.value
+                    record = MetricRecord.model_validate(data)
+                    count += 1
+                    yield record
+                    if max_records and count >= max_records:
+                        return
 
     def close(self) -> None:
         """Close Kafka consumer connection."""
-        self.consumer.close()
+        try:
+            self.consumer.close()
+        except Exception:
+            pass
 
 
 def main() -> int:

@@ -211,32 +211,54 @@ class SparkStreamingPipeline:
         processed_count = 0
         last_log_time = time.time()
 
+        idle_start = time.time()
+        idle_timeout_sec = (poll_timeout_ms / 1000.0) if stop_on_idle else 60.0
+
         try:
-            for message in consumer:
-                processed_record = self.process_raw_record(message.value)
-                if processed_record:
-                    # Write enriched record to output topic
-                    producer.send(
-                        self.output_topic,
-                        key=processed_record.metric_id,
-                        value=processed_record.model_dump(),
-                    )
-                    processed_count += 1
+            while True:
+                try:
+                    records_dict = consumer.poll(timeout_ms=1000, max_records=max_records or 100)
+                except Exception as e:
+                    logger.warning(f"Consumer poll encountered: {e}")
+                    break
 
-                    # Log progress
-                    if processed_count <= 5 or processed_count % 10 == 0 or (time.time() - last_log_time) >= 5:
-                        h = self.health.snapshot(f"{processed_record.window_start} -> {processed_record.window_end}")
-                        print(
-                            f"[Spark] Processed: {h['records_processed']:<4} | "
-                            f"kpi={processed_record.metric_id[:8]}... | "
-                            f"val={processed_record.value:7.4f} | "
-                            f"mean={processed_record.rolling_mean:7.4f} | "
-                            f"std={processed_record.rolling_std:6.4f} | "
-                            f"rate={h['throughput_events_per_sec']:4.1f} eps | "
-                            f"malformed={h['malformed_record_count']}"
-                        )
-                        last_log_time = time.time()
+                if not records_dict:
+                    if stop_on_idle and (time.time() - idle_start) >= idle_timeout_sec:
+                        logger.info("No incoming messages within timeout window. Stopping idle consumer.")
+                        break
+                    continue
 
+                idle_start = time.time()
+                for _tp, messages in records_dict.items():
+                    for message in messages:
+                        processed_record = self.process_raw_record(message.value)
+                        if processed_record:
+                            # Write enriched record to output topic
+                            producer.send(
+                                self.output_topic,
+                                key=processed_record.metric_id,
+                                value=processed_record.model_dump(),
+                            )
+                            processed_count += 1
+
+                            # Log progress
+                            if processed_count <= 5 or processed_count % 10 == 0 or (time.time() - last_log_time) >= 5:
+                                h = self.health.snapshot(f"{processed_record.window_start} -> {processed_record.window_end}")
+                                print(
+                                    f"[Spark] Processed: {h['records_processed']:<4} | "
+                                    f"kpi={processed_record.metric_id[:8]}... | "
+                                    f"val={processed_record.value:7.4f} | "
+                                    f"mean={processed_record.rolling_mean:7.4f} | "
+                                    f"std={processed_record.rolling_std:6.4f} | "
+                                    f"rate={h['throughput_events_per_sec']:4.1f} eps | "
+                                    f"malformed={h['malformed_record_count']}"
+                                )
+                                last_log_time = time.time()
+
+                        if max_records and processed_count >= max_records:
+                            break
+                    if max_records and processed_count >= max_records:
+                        break
                 if max_records and processed_count >= max_records:
                     break
 
