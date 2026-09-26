@@ -11,7 +11,7 @@ Track the development lifecycle for **An Agentic AI Framework for Autonomous Str
 | **Phase 1** | Repository structure, environment, schemas, configuration & logging | **Completed** |
 | **Phase 2A** | Dataset acquisition & validation pipeline (AIOPS_KPI, manifest, sample) | **Completed** |
 | **Phase 2B** | Kafka infrastructure & dataset replay producer | **Completed** |
-| **Phase 3** | Spark Structured Streaming pipeline | In Progress |
+| **Phase 3** | Spark Structured Streaming pipeline | **Completed** |
 | **Phase 4** | AADS streaming anomaly detection baseline | Pending |
 | **Phase 5** | Baseline evaluation (Precision, Recall, F1, Latency) | Pending |
 | **Phase 6** | StreamAD comparison detectors (xStream, HSTree, RRCF) | Pending |
@@ -59,13 +59,15 @@ Track the development lifecycle for **An Agentic AI Framework for Autonomous Str
 - [x] Unit and integration tests passing (`tests/unit/test_kafka_producer.py`, `tests/integration/test_kafka_stream.py`).
 
 ### Phase 3: Spark Structured Streaming Pipeline
-- [ ] Implement PySpark Structured Streaming consumer reading from `raw-metrics`.
-- [ ] Parse JSON schema, convert timestamps, and filter malformed records.
-- [ ] Perform configurable event-time sliding windows.
-- [ ] Calculate rolling statistics (mean, std, min, max, count).
-- [ ] Write processed metric events to `processed-metrics` topic with checkpointing.
-- [ ] Add health/status metrics output (records processed, window, throughput, malformed count).
-- [ ] End-to-end integration test (Producer -> raw-metrics -> Spark -> processed-metrics).
+- [x] Implement Spark Structured Streaming pipeline (`src/agentic_streaming/streaming/pipeline.py`).
+- [x] Parse JSON schema, convert timestamps to event-time, and safely filter malformed records.
+- [x] Perform configurable event-time sliding windows.
+- [x] Calculate rolling statistics (rolling_mean, rolling_std, rolling_min, rolling_max, rolling_count).
+- [x] Checkpointing support (`data/checkpoints/spark`).
+- [x] Emit enriched processed metrics to Kafka `processed-metrics` topic.
+- [x] Real-time health/status telemetry (records processed, window, throughput, malformed count).
+- [x] End-to-end integration test: Kafka producer -> `raw-metrics` -> Spark streaming -> `processed-metrics` (`tests/integration/test_spark_streaming_e2e.py`).
+- [x] Unit tests for rolling window statistics and error handling (`tests/unit/test_streaming_pipeline.py`).
 
 ### Phase 4: AADS Streaming Baseline Detector
 - [ ] Faithful implementation of AADS (*Knowledge-Based Systems*, 2024).
