@@ -1,4 +1,13 @@
-"""Spark Structured Streaming processing pipeline module.
+"""Streaming processing pipeline package."""
 
-Scheduled for implementation in Phase 3.
-"""
+from src.agentic_streaming.streaming.pipeline import (
+    SparkStreamingPipeline,
+    RollingWindowStatistics,
+    StreamingHealthMetrics,
+)
+
+__all__ = [
+    "SparkStreamingPipeline",
+    "RollingWindowStatistics",
+    "StreamingHealthMetrics",
+]
