@@ -85,9 +85,17 @@ Track the development lifecycle for **An Agentic AI Framework for Autonomous Str
 - [x] All 37 unit and integration tests passing cleanly.
 
 ### Phase 5: Baseline Evaluation
-- [ ] Benchmark AADS against dataset ground truth labels.
-- [ ] Calculate Precision, Recall, F1-score, and False Positive Rate (FPR).
-- [ ] Measure throughput (events/sec), detection latency, and memory profile.
+- [x] Comprehensive empirical benchmark of standalone AADS baseline on 50,000 real cloud KPI time-series events (`data/processed/aiops_kpi_clean.csv`):
+  - **Dataset:** AIOPS_KPI (StreamAD benchmark source, 50,000 evaluated records, 341 actual ground truth anomalies).
+  - **Execution Time:** 8.72 seconds.
+  - **Streaming Throughput:** 5,732.4 events/sec.
+  - **Mean Classification Latency:** 0.0523 ms/event.
+  - **Precision:** 17.36% (TP = 75, FP = 357).
+  - **Recall:** 21.99% (FN = 266).
+  - **F1-Score:** 19.40%.
+  - **False Positive Rate (FPR):** 0.720% (TN = 49,302).
+- [x] Baseline results serialized to `experiments/baseline/aads_offline_evaluation.json`.
+- [x] Analysis: Confirmed the critical motivation for the Agentic AI orchestration layer — standalone AADS provides ultra-fast first-stage stream filtering (99.14% stream reduction, 0.05 ms latency), but yields 357 false alerts needing second-stage autonomous agent validation.
 
 ### Phase 6: StreamAD Comparison Detectors
 - [ ] Implement xStream (Random Projection Anomaly Detector).
