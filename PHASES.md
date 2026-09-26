@@ -9,7 +9,8 @@ Track the development lifecycle for **An Agentic AI Framework for Autonomous Str
 | Phase | Description | Status |
 |---|---|---|
 | **Phase 1** | Repository structure, environment, schemas, configuration & logging | **Completed** |
-| **Phase 2** | Kafka infrastructure & dataset replay producer | Pending |
+| **Phase 2A** | Dataset acquisition & validation pipeline (AIOPS_KPI, manifest, sample) | **Completed** |
+| **Phase 2B** | Kafka infrastructure & dataset replay producer | In Progress |
 | **Phase 3** | Spark Structured Streaming pipeline | Pending |
 | **Phase 4** | AADS streaming anomaly detection baseline | Pending |
 | **Phase 5** | Baseline evaluation (Precision, Recall, F1, Latency) | Pending |
@@ -35,8 +36,18 @@ Track the development lifecycle for **An Agentic AI Framework for Autonomous Str
 - [x] Deterministic random seed utilities.
 - [x] Unit test suite (`tests/unit/`) with 100% pass rate.
 
-### Phase 2: Kafka & Dataset Replay Producer
-- [ ] Implement StreamAD dataset loader (AIOPS_KPI, SMD).
+### Phase 2A: Dataset Acquisition & Validation Pipeline
+- [x] Automated benchmark downloader script (`scripts/download_data.py`).
+- [x] Acquired official AIOPS_KPI dataset from StreamAD / NetMan benchmark repository (3,004,066 rows across 29 KPI streams).
+- [x] Rigorous validation pipeline (`scripts/prepare_aiops_kpi.py`):
+  - Column schema verification (`timestamp`, `kpi_id`, `value`, `ground_truth`).
+  - Strict monotonic timestamp ordering per KPI stream.
+  - Zero synthetic labels fabricated; exact benchmark ground truth preserved (79,554 anomalies / 2.648%).
+  - Deduplication and numeric casting.
+- [x] Generated dataset manifest (`data/processed/dataset_manifest.json`) and integration test sample (`data/sample/aiops_kpi_sample.csv`).
+- [x] Unit tests for dataset validation and schema conformance (`tests/unit/test_dataset.py`).
+
+### Phase 2B: Kafka Streaming & Dataset Replay Producer
 - [ ] Build Python time-series replay producer emitting to Kafka `raw-metrics` topic.
 - [ ] Add configurable streaming rates, replay speedups, and deterministic batching.
 - [ ] Verify Kafka broker ingestion and latency.
