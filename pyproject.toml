@@ -42,6 +42,10 @@ addopts = "-ra -q --strict-markers"
 testpaths = ["tests"]
 pythonpath = ["src"]
 python_files = ["test_*.py"]
+markers = [
+    "integration: mark test as integration test",
+]
+
 
 [tool.ruff]
 line-length = 100

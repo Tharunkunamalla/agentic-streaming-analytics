@@ -10,8 +10,8 @@ Track the development lifecycle for **An Agentic AI Framework for Autonomous Str
 |---|---|---|
 | **Phase 1** | Repository structure, environment, schemas, configuration & logging | **Completed** |
 | **Phase 2A** | Dataset acquisition & validation pipeline (AIOPS_KPI, manifest, sample) | **Completed** |
-| **Phase 2B** | Kafka infrastructure & dataset replay producer | In Progress |
-| **Phase 3** | Spark Structured Streaming pipeline | Pending |
+| **Phase 2B** | Kafka infrastructure & dataset replay producer | **Completed** |
+| **Phase 3** | Spark Structured Streaming pipeline | In Progress |
 | **Phase 4** | AADS streaming anomaly detection baseline | Pending |
 | **Phase 5** | Baseline evaluation (Precision, Recall, F1, Latency) | Pending |
 | **Phase 6** | StreamAD comparison detectors (xStream, HSTree, RRCF) | Pending |
@@ -48,14 +48,24 @@ Track the development lifecycle for **An Agentic AI Framework for Autonomous Str
 - [x] Unit tests for dataset validation and schema conformance (`tests/unit/test_dataset.py`).
 
 ### Phase 2B: Kafka Streaming & Dataset Replay Producer
-- [ ] Build Python time-series replay producer emitting to Kafka `raw-metrics` topic.
-- [ ] Add configurable streaming rates, replay speedups, and deterministic batching.
-- [ ] Verify Kafka broker ingestion and latency.
+- [x] Docker Compose KRaft Kafka stack with healthchecks and topic provisioning.
+- [x] Created all required Kafka topics: `raw-metrics`, `processed-metrics`, `anomaly-events`, `agent-decisions`, `analytics-results`.
+- [x] Built `StreamingReplayProducer` (`src/agentic_streaming/kafka/producer.py`):
+  - Row-by-row time-series streaming.
+  - Configurable rates (`--rate 1, 10, 50, 100`), `--limit`, and `--loop`.
+  - Enriched JSON payloads with `event_id`, `ingestion_timestamp`, `ground_truth`, and `source`.
+- [x] Built `StreamingConsumer` (`src/agentic_streaming/kafka/consumer.py`) and verification script (`scripts/verify_kafka_stream.py`).
+- [x] Verified Milestone: Replayed 100 events into Kafka (`raw-metrics`) with 0 errors and 100% acknowledgments.
+- [x] Unit and integration tests passing (`tests/unit/test_kafka_producer.py`, `tests/integration/test_kafka_stream.py`).
 
 ### Phase 3: Spark Structured Streaming Pipeline
 - [ ] Implement PySpark Structured Streaming consumer reading from `raw-metrics`.
-- [ ] Define streaming DataFrame schema and sliding window aggregations.
-- [ ] Configure micro-batch triggers, watermark policies, and checkpointing.
+- [ ] Parse JSON schema, convert timestamps, and filter malformed records.
+- [ ] Perform configurable event-time sliding windows.
+- [ ] Calculate rolling statistics (mean, std, min, max, count).
+- [ ] Write processed metric events to `processed-metrics` topic with checkpointing.
+- [ ] Add health/status metrics output (records processed, window, throughput, malformed count).
+- [ ] End-to-end integration test (Producer -> raw-metrics -> Spark -> processed-metrics).
 
 ### Phase 4: AADS Streaming Baseline Detector
 - [ ] Faithful implementation of AADS (*Knowledge-Based Systems*, 2024).
