@@ -25,7 +25,7 @@ def test_metric_record_serialization():
         timestamp=now,
         metric_id="cpu_utilization",
         value=78.4,
-        ground_truth_label=0,
+        ground_truth=0,
         metadata={"server_id": "srv-01"},
     )
     json_str = metric.model_dump_json()
@@ -33,13 +33,15 @@ def test_metric_record_serialization():
 
     assert data["metric_id"] == "cpu_utilization"
     assert data["value"] == 78.4
-    assert data["ground_truth_label"] == 0
+    assert data["ground_truth"] == 0
+    assert metric.ground_truth_label == 0
     assert data["metadata"]["server_id"] == "srv-01"
 
     # Reconstruct from JSON
     reconstructed = MetricRecord.model_validate_json(json_str)
     assert reconstructed.metric_id == metric.metric_id
     assert reconstructed.value == metric.value
+
 
 
 def test_anomaly_event_creation():
