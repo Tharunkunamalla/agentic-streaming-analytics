@@ -19,11 +19,14 @@ from src.schemas.evaluation import (
     StreamingEvaluationMetrics,
 )
 from src.schemas.metric import MetricBatch, MetricRecord
+from src.schemas.processed import ProcessedMetricRecord
 
 __all__ = [
     "MetricRecord",
     "MetricBatch",
+    "ProcessedMetricRecord",
     "AnomalyEvent",
+
     "AgentActionType",
     "AgentDecision",
     "ToolCallRecord",
