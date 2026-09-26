@@ -1,0 +1,61 @@
+# ==============================================================================
+# Streaming Analytics Default Pipeline & Detector Configuration
+# ==============================================================================
+
+pipeline:
+  app_name: "agentic-streaming-analytics"
+  environment: "development"
+  random_seed: 42
+
+kafka:
+  bootstrap_servers: "localhost:9092"
+  topics:
+    raw_metrics: "raw-metrics"
+    anomaly_events: "anomaly-events"
+    agent_decisions: "agent-decisions"
+  consumer_groups:
+    streaming: "spark-streaming-group"
+    agent: "langgraph-agent-group"
+
+streaming:
+  spark_master: "local[*]"
+  trigger_interval: "1 second"
+  checkpoint_dir: "./data/checkpoints/spark"
+
+baseline_detector:
+  name: "AADS"
+  window_size: 100
+  threshold: 3.0
+  decay_factor: 0.05
+
+comparison_detectors:
+  xstream:
+    num_components: 32
+  hstree:
+    num_trees: 25
+    max_depth: 15
+  rrcf:
+    num_trees: 30
+    tree_size: 256
+
+agent:
+  provider: "openai"
+  model: "gpt-4o-mini"
+  temperature: 0.0
+  max_retries: 3
+  timeout_seconds: 15.0
+  allowed_actions:
+    - "NO_ACTION"
+    - "INVESTIGATE"
+    - "CHECK_DRIFT"
+    - "COMPARE_DETECTORS"
+    - "RUN_ALTERNATIVE_DETECTOR"
+    - "REQUEST_DEEP_ANALYSIS"
+
+memory:
+  type: "chroma"
+  persist_directory: "./data/chroma_db"
+  similarity_top_k: 5
+
+storage:
+  database_url: "sqlite:///./data/results.db"

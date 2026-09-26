@@ -47,3 +47,12 @@ def test_singleton_getter():
     """Verify get_settings returns a valid Settings instance."""
     settings = get_settings()
     assert isinstance(settings, Settings)
+
+
+def test_agentic_streaming_config_module():
+    """Verify agentic_streaming.config exports work identically."""
+    from agentic_streaming.config import Settings as ASettings, get_settings as as_get_settings
+    s = as_get_settings()
+    assert isinstance(s, ASettings)
+    assert s.app_name == "agentic-streaming-analytics"
+
