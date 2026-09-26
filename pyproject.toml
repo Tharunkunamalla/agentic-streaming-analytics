@@ -1,0 +1,53 @@
+[build-system]
+requires = ["setuptools>=65.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "agentic-streaming-analytics"
+version = "0.1.0"
+description = "An Agentic AI Framework for Autonomous Streaming Data Analytics"
+readme = "README.md"
+authors = [{ name = "Tharun Kunamalla" }]
+requires-python = ">=3.10"
+dependencies = [
+    "pydantic>=2.7.0",
+    "pydantic-settings>=2.2.0",
+    "python-dotenv>=1.0.0",
+    "python-json-logger>=2.0.7",
+    "rich>=13.7.0",
+    "numpy>=1.26.0",
+    "pandas>=2.2.0",
+    "scipy>=1.12.0",
+    "scikit-learn>=1.4.0",
+    "SQLAlchemy>=2.0.25",
+    "kafka-python>=2.0.2",
+    "confluent-kafka>=2.3.0",
+    "pyspark>=3.5.0",
+    "langgraph>=0.0.20",
+    "langchain>=0.1.20",
+    "langchain-core>=0.1.52",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-cov>=4.1.0",
+    "pytest-mock>=3.12.0",
+    "ruff>=0.3.0",
+]
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+addopts = "-ra -q --strict-markers"
+testpaths = ["tests"]
+pythonpath = ["src"]
+python_files = ["test_*.py"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+exclude = [".git", "__pycache__", "build", "dist", "data"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "N", "UP", "B", "A", "C4", "T20"]
+ignore = ["B008"]
