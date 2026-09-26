@@ -75,6 +75,10 @@ data/raw/*
 !data/raw/.gitkeep
 data/processed/*
 !data/processed/.gitkeep
+!data/processed/dataset_manifest.json
+data/sample/*
+!data/sample/.gitkeep
+!data/sample/aiops_kpi_sample.csv
 data/chroma_db/
 logs/*
 !logs/.gitkeep
