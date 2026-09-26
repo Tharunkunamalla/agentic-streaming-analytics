@@ -1,38 +1,16 @@
-# An Agentic AI Framework for Autonomous Streaming Data Analytics
+# Agentic Streaming Analytics Framework
 
-[![Python](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
-[![Kafka](https://img.shields.io/badge/Apache%20Kafka-KRaft-black.svg)](https://kafka.apache.org/)
-[![Spark](https://img.shields.io/badge/Apache%20Spark-3.5%2B-orange.svg)](https://spark.apache.org/)
-[![LangGraph](https://img.shields.io/badge/LangGraph-Agentic%20Orchestration-green.svg)](https://github.com/langchain-ai/langgraph)
-[![License](https://img.shields.io/badge/License-Academic%20Project-lightgrey.svg)]()
-
-> **Course Project:** IOE413 Streaming Data Analytics Mini-Project  
-> **Topic:** Autonomous Streaming Data Analytics with Event-Driven Agentic Orchestration
+An end-to-end, event-driven streaming analytics pipeline that integrates high-throughput streaming anomaly detection with autonomous, agentic reasoning. Built for cloud platform metrics (AIOPS_KPI, SMD) using Apache Kafka, Apache Spark Structured Streaming, AADS, and LangGraph.
 
 ---
 
-## 1. Executive Summary & Research Positioning
+## Overview
 
-### 1.1 Project Objective
-Modern cloud computing environments generate high-velocity telemetry and KPI time series where traditional fixed-threshold and purely statistical detectors struggle with non-stationary distributions, transient spikes, and concept drifts. While streaming anomaly detectors (e.g., AADS, xStream, HSTree, RRCF) offer millisecond-level throughput, they lack contextual reasoning to autonomously triage alerts, diagnose drift, and dynamically select optimal detection heuristics.
+High-velocity cloud telemetry streams require both sub-millisecond detection throughput and intelligent, context-aware triage. Traditional streaming anomaly detectors identify statistical outliers rapidly, but cannot autonomously diagnose concept drifts, evaluate multi-detector consensus, or reference historical operational incidents.
 
-This project implements an **end-to-end, event-driven streaming analytics framework** that couples lightweight, high-throughput streaming anomaly detection with a **LangGraph-based agentic reasoning layer**.
-
-### 1.2 Research Foundation & Academic Grounding
-Our system is grounded in peer-reviewed literature:
-1. **AADS (Autonomous Anomaly Detection for Streaming Data)**: *Knowledge-Based Systems*, 2024. Provides the online baseline streaming statistical detection model.
-2. **StreamAD**: *A cloud platform metrics-oriented benchmark for unsupervised online anomaly detection*, 2023. Provides benchmark datasets and comparative streaming algorithms (xStream, HSTree, RRCF).
-3. **LEMAD (LLM-Empowered Multi-Agent System for Anomaly Detection in Power Grid Services)**: 2025. Informs agentic decision workflows and domain contextualization.
-
-### 1.3 Architectural Contribution & Boundaries
-- **Controlled Orchestration**: We do *not* claim to have invented agentic anomaly detection or to be the first to combine LLMs with time-series analysis. Our contribution is a **controlled, event-driven orchestration architecture** operating over a Kafka boundary.
-- **Hierarchical First-Stage Filter**: The LLM agent is **never** invoked on raw streaming records. Spark Structured Streaming and the AADS streaming baseline process every continuous metric in sub-millisecond time.
-- **Event-Driven Agentic Trigger**: Only candidate anomaly events exceeding statistical thresholds trigger the asynchronous LangGraph agent.
-- **Constrained Predefined Toolset**: The agent operates solely through strictly defined analytical tools (statistics, drift testing, detector comparison, episodic memory). It **never executes arbitrary code or shell commands**.
-
----
-
-## 2. End-to-End Architecture
+This project implements a **two-stage hierarchical framework**:
+1. **Streaming Detection Layer (First Stage):** Apache Spark Structured Streaming and the AADS (*Autonomous Anomaly Detection for Streaming Data*) baseline process continuous time-series metrics in sub-millisecond real time.
+2. **Agentic Orchestration Layer (Second Stage):** Only verified anomaly candidates are published to an `anomaly-events` Kafka topic. A LangGraph-based agent consumes these events and executes structured analytical tools (drift detection, multi-detector benchmarking, and episodic memory lookup) to reach a validated operational decision.
 
 ```
                   STREAMAD DATASET
@@ -96,92 +74,146 @@ Our system is grounded in peer-reviewed literature:
 
 ---
 
-## 3. Predefined Agent Actions & Analytical Tools
+## Core Capabilities
 
-### 3.1 Primary Actions
-- `NO_ACTION`: Disregard transient noise or false alarm.
-- `INVESTIGATE`: Request window context expansion and anomaly verification.
-- `CHECK_DRIFT`: Trigger two-sample Kolmogorov-Smirnov / Page-Hinkley test on stream baseline.
-- `COMPARE_DETECTORS`: Run multi-detector benchmark against window (AADS, xStream, HSTree, RRCF).
-- `RUN_ALTERNATIVE_DETECTOR`: Switch streaming pipeline to recommended detector.
-- `REQUEST_DEEP_ANALYSIS`: Escalate persistent systemic anomalies for operator intervention.
-
-### 3.2 Controlled Analytical Tools
-1. `calculate_statistics`: Window mean, standard deviation, kurtosis, skewness, interquartile range.
-2. `check_drift`: Non-parametric drift and change-point testing.
-3. `run_xstream`: StreamAD random projection detector.
-4. `run_hstree`: StreamAD Half-Space Trees detector.
-5. `run_rrcf`: Robust Random Cut Forest detector.
-6. `compare_detectors`: Ensemble scoring and consensus evaluation.
-7. `retrieve_similar_events`: Vector similarity lookup across historical anomaly incidents.
-8. `store_decision`: Persist validated decision to episodic memory and relational storage.
+- **Decoupled Event Boundary:** The streaming engine remains isolated from LLM response latencies. High-velocity stream ingestion is never blocked by agentic reasoning.
+- **Controlled Analytical Toolset:** The agent chooses from predefined deterministic tools (`calculate_statistics`, `check_drift`, `compare_detectors`, `retrieve_similar_events`, `store_decision`). It does not execute arbitrary code or shell commands.
+- **Adaptive Detector Switching:** Diagnoses concept drift via statistical tests (e.g., Kolmogorov-Smirnov) and benchmarks alternative StreamAD-compatible algorithms (xStream, HSTree, RRCF) in real time.
+- **Episodic Vector Memory:** Uses vector similarity to retrieve similar past anomalies and their resolutions, improving decision consistency over time.
+- **Full-Stack Observability:** Persists telemetry, anomaly events, tool execution traces, and agent decisions to PostgreSQL/SQLite, surfaced in real-time Grafana dashboards.
 
 ---
 
-## 4. Repository Layout
+## Research Foundations
+
+1. **AADS**: *Autonomous Anomaly Detection for Streaming Data*, Knowledge-Based Systems, 2024.  
+   Provides the core online baseline streaming anomaly detection algorithm.
+2. **StreamAD**: *A cloud platform metrics-oriented benchmark for unsupervised online anomaly detection*, 2023.  
+   Supplies real-world cloud benchmark datasets (AIOPS_KPI, SMD) and comparative detector implementations (xStream, HSTree, RRCF).
+3. **LEMAD**: *LLM-Empowered Multi-Agent System for Anomaly Detection in Power Grid Services*, 2025.  
+   Informs agentic decision workflows and context formulation for streaming time series.
+
+---
+
+## Repository Structure
 
 ```
-├── .env.example              # Environment variables template
-├── .gitignore                # Git ignore patterns
-├── pyproject.toml            # Project packaging & pytest/ruff config
-├── requirements.txt          # Production dependencies
-├── docker/
-│   └── docker-compose.yml    # Kafka (KRaft), Postgres, Grafana, Kafka UI
-├── scripts/
-│   └── check_env.py          # Phase 1 verification script
+agentic-streaming-analytics/
+├── README.md                  # Project overview and documentation
+├── PHASES.md                  # Project development roadmap & progress tracking
+├── LICENSE                    # MIT License
+├── .gitignore                 # Git ignore rules
+├── .env.example               # Environment configuration template
+├── docker-compose.yml         # Kafka (KRaft), Kafka UI, Postgres, Grafana stack
+├── pyproject.toml             # Python packaging and test configuration
+├── requirements.txt           # Project dependencies
+│
+├── config/
+│   └── pipeline.yaml          # Default pipeline hyperparameters
+│
+├── data/
+│   ├── raw/                   # Raw benchmark datasets (AIOPS_KPI, SMD)
+│   ├── processed/             # Cleaned evaluation artifacts
+│   └── sample/                # Sample test streams
+│
 ├── src/
-│   ├── __init__.py
-│   ├── config/               # Pydantic BaseSettings & configuration
-│   ├── schemas/              # Pydantic data contracts (Metric, Anomaly, Agent, etc.)
-│   ├── utils/                # Structured logging (JSON/Text), seed utilities
-│   ├── producer/             # Stream replay producer (Phase 2)
-│   ├── streaming/            # Spark Structured Streaming pipeline (Phase 3)
-│   ├── detectors/            # AADS & StreamAD detectors (Phases 4 & 6)
-│   ├── agent/                # LangGraph state machine, tools & memory (Phases 8-10)
-│   ├── storage/              # Database persistence & vector memory (Phase 11)
-│   └── evaluation/           # Detection, Streaming & Agent metrics (Phases 5 & 12)
+│   └── agentic_streaming/
+│       ├── config.py          # Type-safe Pydantic settings management
+│       ├── schemas/           # Pydantic contracts (Metric, Anomaly, Agent, etc.)
+│       ├── kafka/             # Replay producer and streaming consumer utilities
+│       ├── streaming/         # Spark Structured Streaming pipeline
+│       ├── aads/              # AADS streaming detector implementation
+│       ├── detectors/         # StreamAD comparison detectors (xStream, HSTree, RRCF)
+│       ├── agent/             # LangGraph state machine and decision logic
+│       ├── tools/             # Analytical tools (statistics, drift, comparison)
+│       ├── memory/            # Episodic vector store integration (ChromaDB)
+│       ├── storage/           # Relational persistence models and queries
+│       ├── metrics/           # Evaluation metrics (Detection, Streaming, Agent)
+│       └── utils/             # Structured JSON logging and seed utilities
+│
+├── scripts/
+│   └── check_env.py           # Environment and structure integrity validator
+│
 ├── tests/
-│   ├── conftest.py           # Pytest global fixtures
-│   ├── unit/                 # Unit test suite
-│   │   ├── test_config.py
-│   │   ├── test_schemas.py
-│   │   └── test_logger.py
-│   └── integration/          # End-to-end integration tests
-└── data/
-    ├── raw/                  # Datasets (AIOPS_KPI, SMD)
-    └── processed/            # Processed artifacts
+│   ├── conftest.py            # Global test fixtures
+│   ├── unit/                  # Unit test suite
+│   └── integration/           # End-to-end integration tests
+│
+├── experiments/
+│   ├── configs/               # Reproducible experiment configurations
+│   ├── baseline/              # Baseline evaluation outputs
+│   ├── proposed/              # Proposed framework experiment runs
+│   └── results/               # Comparative evaluation result tables and figures
+│
+├── dashboards/
+│   └── grafana/               # Grafana dashboards and provisioning configs
+│
+├── notebooks/                 # Exploratory analysis and visual verification
+│
+└── docs/
+    ├── architecture/          # Architectural specifications
+    ├── experiments/           # Experimental protocol documentation
+    └── report/                # Final academic report artifacts
 ```
 
 ---
 
-## 5. Development Phases
+## Getting Started
 
-| Phase | Description | Status |
-|---|---|---|
-| **Phase 1** | Repository structure, environment, schemas, configuration & logging | **Completed** |
-| **Phase 2** | Kafka infrastructure & dataset replay producer | Pending |
-| **Phase 3** | Spark Structured Streaming pipeline | Pending |
-| **Phase 4** | AADS streaming anomaly detection baseline | Pending |
-| **Phase 5** | Baseline evaluation (Precision, Recall, F1, Latency) | Pending |
-| **Phase 6** | StreamAD comparison detectors (xStream, HSTree, RRCF) | Pending |
-| **Phase 7** | Anomaly event Kafka pipeline & context builder | Pending |
-| **Phase 8** | LangGraph agent state machine & decision node | Pending |
-| **Phase 9** | Agent analytical tools & vector memory | Pending |
-| **Phase 10** | Autonomous detector/analysis selection logic | Pending |
-| **Phase 11** | Database storage & Grafana dashboard provisioning | Pending |
-| **Phase 12** | Comprehensive comparative experiments | Pending |
-| **Phase 13** | Report artifacts, figures & demonstration package | Pending |
+### Prerequisites
+- Python 3.10+
+- Docker & Docker Compose (for Kafka, PostgreSQL, Grafana)
+- Java 8/11/17 (required for Apache Spark)
 
----
+### Installation
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/Tharunkunamalla/agentic-streaming-analytics.git
+   cd agentic-streaming-analytics
+   ```
 
-## 6. Phase 1 Verification & Testing
+2. Create and activate a virtual environment:
+   ```bash
+   python -m venv .venv
+   # Windows:
+   .venv\Scripts\activate
+   # Linux / macOS:
+   source .venv/bin/activate
+   ```
 
-### 6.1 Running the Environment Verification Script
+3. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+4. Configure environment variables:
+   ```bash
+   cp .env.example .env
+   ```
+
+### Verification & Testing
+Run the environment verification script:
 ```bash
 python scripts/check_env.py
 ```
 
-### 6.2 Running Unit Tests
+Run the unit test suite:
 ```bash
 pytest tests/unit -v
 ```
+
+### Starting Infrastructure Services
+Start the Kafka broker, Kafka UI, PostgreSQL, and Grafana containers:
+```bash
+docker-compose up -d
+```
+- **Kafka Broker:** `localhost:9092`
+- **Kafka UI:** `http://localhost:8080`
+- **PostgreSQL:** `localhost:5432`
+- **Grafana:** `http://localhost:3000` (Default login: `admin` / `admin`)
+
+---
+
+## Roadmap
+
+For the detailed phase-by-phase implementation plan and current milestone status, refer to [PHASES.md](PHASES.md).
