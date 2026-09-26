@@ -1,0 +1,100 @@
+# Project Roadmap & Implementation Phases
+
+Track the development lifecycle for **An Agentic AI Framework for Autonomous Streaming Data Analytics** across the 13 planned engineering and research phases.
+
+---
+
+## Progress Overview
+
+| Phase | Description | Status |
+|---|---|---|
+| **Phase 1** | Repository structure, environment, schemas, configuration & logging | **Completed** |
+| **Phase 2** | Kafka infrastructure & dataset replay producer | Pending |
+| **Phase 3** | Spark Structured Streaming pipeline | Pending |
+| **Phase 4** | AADS streaming anomaly detection baseline | Pending |
+| **Phase 5** | Baseline evaluation (Precision, Recall, F1, Latency) | Pending |
+| **Phase 6** | StreamAD comparison detectors (xStream, HSTree, RRCF) | Pending |
+| **Phase 7** | Anomaly event Kafka pipeline & context builder | Pending |
+| **Phase 8** | LangGraph agent state machine & decision node | Pending |
+| **Phase 9** | Agent analytical tools & vector memory | Pending |
+| **Phase 10** | Autonomous detector/analysis selection logic | Pending |
+| **Phase 11** | Database storage & Grafana dashboard provisioning | Pending |
+| **Phase 12** | Comprehensive comparative experiments | Pending |
+| **Phase 13** | Report artifacts, figures & demonstration package | Pending |
+
+---
+
+## Detailed Phase Breakdown
+
+### Phase 1: Repository Structure & Environment
+- [x] Initialized directory layout (`src/agentic_streaming`, `config`, `docker`, `tests`, `docs`, `experiments`).
+- [x] Pydantic configuration models with `.env` loading and environment overrides.
+- [x] Structured JSON / Text logging with ISO timestamps and context fields.
+- [x] Pydantic data schemas: `MetricRecord`, `AnomalyEvent`, `AgentDecision`, `DriftReport`, `DetectorScore`, evaluation metrics.
+- [x] Docker Compose stack definition (Kafka KRaft, Kafka UI, PostgreSQL, Grafana).
+- [x] Deterministic random seed utilities.
+- [x] Unit test suite (`tests/unit/`) with 100% pass rate.
+
+### Phase 2: Kafka & Dataset Replay Producer
+- [ ] Implement StreamAD dataset loader (AIOPS_KPI, SMD).
+- [ ] Build Python time-series replay producer emitting to Kafka `raw-metrics` topic.
+- [ ] Add configurable streaming rates, replay speedups, and deterministic batching.
+- [ ] Verify Kafka broker ingestion and latency.
+
+### Phase 3: Spark Structured Streaming Pipeline
+- [ ] Implement PySpark Structured Streaming consumer reading from `raw-metrics`.
+- [ ] Define streaming DataFrame schema and sliding window aggregations.
+- [ ] Configure micro-batch triggers, watermark policies, and checkpointing.
+
+### Phase 4: AADS Streaming Baseline Detector
+- [ ] Faithful implementation of AADS (*Knowledge-Based Systems*, 2024).
+- [ ] Sliding statistical window with exponential decay weighting.
+- [ ] Streaming distance calculation and adaptive thresholding.
+- [ ] Sub-millisecond record classification (Normal vs Anomaly candidate).
+
+### Phase 5: Baseline Evaluation
+- [ ] Benchmark AADS against dataset ground truth labels.
+- [ ] Calculate Precision, Recall, F1-score, and False Positive Rate (FPR).
+- [ ] Measure throughput (events/sec), detection latency, and memory profile.
+
+### Phase 6: StreamAD Comparison Detectors
+- [ ] Implement xStream (Random Projection Anomaly Detector).
+- [ ] Implement Half-Space Trees (HSTree).
+- [ ] Implement Robust Random Cut Forest (RRCF).
+- [ ] Benchmark comparison algorithms on identical stream data.
+
+### Phase 7: Anomaly Event Pipeline & Context Builder
+- [ ] Publish detected anomaly events to Kafka `anomaly-events` topic.
+- [ ] Build contextual window buffers (pre/post anomaly snapshots, summary stats).
+- [ ] Asynchronous event consumer boundary isolating streaming from agentic reasoning.
+
+### Phase 8: LangGraph Agent Core
+- [ ] Define LangGraph agent state graph and decision nodes.
+- [ ] System prompt design enforcing predefined action space:
+  - `NO_ACTION`, `INVESTIGATE`, `CHECK_DRIFT`, `COMPARE_DETECTORS`, `RUN_ALTERNATIVE_DETECTOR`, `REQUEST_DEEP_ANALYSIS`.
+- [ ] Deterministic LLM interaction with timeout and retry handling.
+
+### Phase 9: Agent Tools & Episodic Memory
+- [ ] Controlled tools: `calculate_statistics`, `check_drift`, `run_xstream`, `run_hstree`, `run_rrcf`, `compare_detectors`.
+- [ ] Vector memory integration (ChromaDB) for historical anomaly retrieval (`retrieve_similar_events`, `store_decision`).
+- [ ] Decision output validation preventing hallucinated actions or parameters.
+
+### Phase 10: Autonomous Detector & Analysis Selection
+- [ ] Context-aware dynamic detector switching logic.
+- [ ] Regime change and concept drift adaptation protocol.
+- [ ] Feedback loop between agent decisions and streaming pipeline.
+
+### Phase 11: Persistent Storage & Grafana Dashboards
+- [ ] PostgreSQL / SQLite relational tables for anomaly logs, decisions, and tool traces.
+- [ ] Provision Grafana data sources and real-time streaming dashboards.
+- [ ] Visual telemetry: Stream metrics, anomaly markers, agent actions, and latency metrics.
+
+### Phase 12: Empirical Experiments & Comparative Evaluation
+- [ ] Experiment 1: AADS Baseline vs. AADS + Agentic Layer.
+- [ ] Experiment 2: Multi-detector performance under synthetic & real concept drifts.
+- [ ] Experiment 3: Agent decision accuracy, unnecessary tool call rates, and latency overhead.
+
+### Phase 13: Report Artifacts & Demonstration Package
+- [ ] Generate figures, confusion matrices, and ablation tables.
+- [ ] Finalize technical documentation and course mini-project report.
+- [ ] End-to-end replay demo script for presentation.
