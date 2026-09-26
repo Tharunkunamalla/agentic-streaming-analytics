@@ -1,4 +1,9 @@
-"""Kafka replay producer, consumers, and topic management module.
+"""Kafka streaming module for dataset replay and topic consumers."""
 
-Scheduled for implementation in Phase 2.
-"""
+from src.agentic_streaming.kafka.producer import (
+    StreamingReplayProducer,
+    load_dataset_records,
+)
+from src.agentic_streaming.kafka.consumer import StreamingConsumer
+
+__all__ = ["StreamingReplayProducer", "StreamingConsumer", "load_dataset_records"]
