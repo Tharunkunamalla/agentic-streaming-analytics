@@ -93,11 +93,16 @@ d:\Streaming-project\
 
 ### Step 1: Environment Setup
 Ensure Python 3.10+ and Docker are installed.
-```bash
-# 1. Activate virtual environment
-.venv\Scripts\activate
+```powershell
+# 1. Create virtual environment (if not already created)
+python -m venv .venv
 
-# 2. Verify environment integrity
+# 2. Activate virtual environment in PowerShell
+.\.venv\Scripts\Activate.ps1
+# Or in CMD:
+# .venv\Scripts\activate.bat
+
+# 3. Verify environment integrity
 python scripts/check_env.py
 ```
 
