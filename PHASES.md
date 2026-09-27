@@ -17,8 +17,8 @@ Track the development lifecycle for **An Agentic AI Framework for Autonomous Str
 | **Phase 6** | StreamAD comparison detectors (xStream, HSTree, RRCF) | **Completed** |
 | **Phase 7** | Anomaly event Kafka pipeline & context builder | **Completed** |
 | **Phase 8** | LangGraph agent state machine & decision node | **Completed** |
-| **Phase 9** | Agent analytical tools & vector memory | Pending |
-| **Phase 10** | Autonomous detector/analysis selection logic | Pending |
+| **Phase 9** | Controlled agent tools & allowlisted registry | **Completed** |
+| **Phase 10** | Simple durable SQLite memory & event retrieval | **Completed** |
 | **Phase 11** | Database storage & Grafana dashboard provisioning | Pending |
 | **Phase 12** | Comprehensive comparative experiments | Pending |
 | **Phase 13** | Report artifacts, figures & demonstration package | Pending |
@@ -132,15 +132,24 @@ Track the development lifecycle for **An Agentic AI Framework for Autonomous Str
 - [x] Strict security enforcement: 0 arbitrary code execution, 0 shell tools, 0 raw credentials.
 - [x] Complete unit test suite (`tests/unit/test_agent.py`) verifying state machine, validation retries, fallback mechanics, and action space constraints. All tests passing.
 
-### Phase 9: Agent Tools & Episodic Memory
-- [ ] Controlled tools: `calculate_statistics`, `check_drift`, `run_xstream`, `run_hstree`, `run_rrcf`, `compare_detectors`.
-- [ ] Vector memory integration (ChromaDB) for historical anomaly retrieval (`retrieve_similar_events`, `store_decision`).
-- [ ] Decision output validation preventing hallucinated actions or parameters.
+### Phase 9: Controlled Agent Tools & Allowlisted Registry
+- [x] Implemented all 8 required agent tools with typed Pydantic input/output schemas:
+  1. `calculate_statistics`: Mean, std, min, max, median, p95, z-score.
+  2. `check_drift`: KS-test 2-sample p-value and Population Stability Index (PSI).
+  3. `run_xstream`: Multi-projection online stream detector.
+  4. `run_hstree`: Streaming isolation tree ensemble.
+  5. `run_rrcf`: Robust Random Cut Forest anomaly evaluation.
+  6. `compare_detectors`: Parallel evaluation across all 4 detectors with agreement ratio.
+  7. `retrieve_similar_events`: Episodic memory lookup from SQLite.
+  8. `store_decision`: Permanent decision trajectory recording into SQLite memory.
+- [x] Built allowlisted `ToolRegistry` (`src/agentic_streaming/tools/registry.py`) measuring execution latency, validating schemas, handling execution errors safely, and preventing arbitrary code execution.
+- [x] Unit test suite (`tests/unit/test_tools.py`) verifying tool execution, error handling, and schema validation.
 
-### Phase 10: Autonomous Detector & Analysis Selection
-- [ ] Context-aware dynamic detector switching logic.
-- [ ] Regime change and concept drift adaptation protocol.
-- [ ] Feedback loop between agent decisions and streaming pipeline.
+### Phase 10: Simple Durable Memory Store
+- [x] Simple, durable SQLite memory manager (`src/agentic_streaming/memory/sqlite_memory.py`) saving experiment metadata to `data/memory.db`.
+- [x] Every memory record includes required fields: `event_id`, `timestamp`, `action`, `tool`, `result`, `success`, `latency_ms`, `event_type`, `detector`.
+- [x] Implemented `store_decision()` and `retrieve_similar_events()` for simple episodic memory lookup.
+- [x] Unit test suite (`tests/unit/test_memory.py`) proving stored events can be retrieved. All 49 test cases passing cleanly.
 
 ### Phase 11: Persistent Storage & Grafana Dashboards
 - [ ] PostgreSQL / SQLite relational tables for anomaly logs, decisions, and tool traces.

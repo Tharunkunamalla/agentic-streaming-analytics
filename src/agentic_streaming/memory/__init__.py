@@ -1,4 +1,5 @@
-"""Vector and episodic memory module for storing and retrieving past agent decisions.
+"""Durable Memory Package for Agent Decision History."""
 
-Scheduled for implementation in Phase 9.
-"""
+from src.agentic_streaming.memory.sqlite_memory import SQLiteMemoryManager
+
+__all__ = ["SQLiteMemoryManager"]
