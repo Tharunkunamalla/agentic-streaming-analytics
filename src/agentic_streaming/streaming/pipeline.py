@@ -20,7 +20,9 @@ from uuid import uuid4
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent.parent
 sys.path.insert(0, str(REPO_ROOT))
 
+from src.agentic_streaming.aads.detector import AADSDetector
 from src.config.settings import get_settings
+from src.schemas.anomaly import AnomalyEvent
 from src.schemas.metric import MetricRecord
 from src.schemas.processed import ProcessedMetricRecord
 from src.utils.logger import get_logger
@@ -116,11 +118,14 @@ class SparkStreamingPipeline:
         self.bootstrap_servers = bootstrap_servers or settings.kafka_bootstrap_servers
         self.input_topic = input_topic or settings.kafka_raw_metrics_topic
         self.output_topic = output_topic or "processed-metrics"
+        self.anomaly_topic = settings.kafka_anomaly_events_topic
         self.checkpoint_dir = Path(checkpoint_dir or settings.spark_checkpoint_dir)
         self.checkpoint_dir.mkdir(parents=True, exist_ok=True)
         self.window_size = window_size
         self.stats_engine = RollingWindowStatistics(window_size=self.window_size)
         self.health = StreamingHealthMetrics()
+        self.aads_detector = AADSDetector()
+        self.recent_anomalies: Dict[str, deque] = defaultdict(lambda: deque(maxlen=100))
 
     def process_raw_record(self, raw_data: Any) -> Optional[ProcessedMetricRecord]:
         """Validate, parse, convert timestamp, and compute rolling statistics."""
@@ -202,10 +207,11 @@ class SparkStreamingPipeline:
 
         print("=" * 70)
         print("Spark Structured Streaming Application: ACTIVE")
-        print(f"Input Topic:  {self.input_topic}")
-        print(f"Output Topic: {self.output_topic}")
-        print(f"Window Size:  {self.window_size} events")
-        print(f"Checkpoint:   {self.checkpoint_dir}")
+        print(f"Input Topic:   {self.input_topic}")
+        print(f"Output Topic:  {self.output_topic}")
+        print(f"Anomaly Topic: {self.anomaly_topic}")
+        print(f"Window Size:   {self.window_size} events")
+        print(f"Checkpoint:    {self.checkpoint_dir}")
         print("=" * 70)
 
         processed_count = 0
@@ -233,13 +239,68 @@ class SparkStreamingPipeline:
                     for message in messages:
                         processed_record = self.process_raw_record(message.value)
                         if processed_record:
-                            # Write enriched record to output topic
+                            # 1. Write enriched record to output topic (processed-metrics)
                             producer.send(
                                 self.output_topic,
                                 key=processed_record.metric_id,
                                 value=processed_record.model_dump(),
                             )
                             processed_count += 1
+
+                            # 2. First-stage AADS anomaly detection baseline
+                            aads_res = self.aads_detector.detect_one({
+                                "event_id": processed_record.event_id,
+                                "timestamp": processed_record.timestamp,
+                                "value": processed_record.value,
+                                "metric_id": processed_record.metric_id,
+                                "ground_truth": processed_record.ground_truth,
+                            })
+
+                            # Track anomaly history for frequency computation
+                            self.recent_anomalies[processed_record.metric_id].append(
+                                (processed_record.timestamp, aads_res["is_anomaly"])
+                            )
+
+                            # 3. IF Anomaly: Publish structured AnomalyEvent payload ONLY for anomalous events
+                            if aads_res["is_anomaly"]:
+                                recent_history = self.recent_anomalies[processed_record.metric_id]
+                                anomaly_freq = sum(1 for _, is_anom in recent_history if is_anom) / max(len(recent_history), 1)
+
+                                anomaly_payload = AnomalyEvent(
+                                    event_id=processed_record.event_id,
+                                    timestamp=processed_record.timestamp,
+                                    dataset="AIOPS_KPI",
+                                    features={
+                                        "metric_id": processed_record.metric_id,
+                                        "value": processed_record.value,
+                                        "ground_truth": processed_record.ground_truth,
+                                    },
+                                    anomaly_score=float(aads_res["anomaly_score"]),
+                                    detector="AADS",
+                                    recent_window_summary={
+                                        "rolling_mean": processed_record.rolling_mean,
+                                        "rolling_std": processed_record.rolling_std,
+                                        "rolling_min": processed_record.rolling_min,
+                                        "rolling_max": processed_record.rolling_max,
+                                        "rolling_count": float(processed_record.rolling_count),
+                                    },
+                                    anomaly_frequency=round(anomaly_freq, 4),
+                                    recent_detector_metrics={
+                                        "throughput_eps": round(self.health.last_throughput, 2),
+                                        "malformed_count": self.health.total_malformed_records,
+                                        "processed_count": self.health.total_records_processed,
+                                    },
+                                )
+
+                                producer.send(
+                                    self.anomaly_topic,
+                                    key=anomaly_payload.metric_id,
+                                    value=anomaly_payload.model_dump(),
+                                )
+                                logger.info(
+                                    f"Published ANOMALY EVENT {anomaly_payload.event_id[:8]}... "
+                                    f"score={anomaly_payload.anomaly_score:.4f} to '{self.anomaly_topic}'"
+                                )
 
                             # Log progress
                             if processed_count <= 5 or processed_count % 10 == 0 or (time.time() - last_log_time) >= 5:
