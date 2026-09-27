@@ -1,45 +1,64 @@
-"""Data models for detected anomaly events emitted over Kafka."""
+"""Data models for detected anomaly events emitted over Kafka anomaly-events topic."""
 
-from datetime import datetime
+from datetime import datetime, timezone
+from typing import Any, Dict, List, Optional
 from uuid import uuid4
 from pydantic import BaseModel, ConfigDict, Field
 
 
 class AnomalyEvent(BaseModel):
-    """Represents a streaming anomaly event emitted by the first-stage detector."""
+    """Structured anomaly event payload published to Kafka anomaly-events topic.
+
+    Exclusively emitted when first-stage streaming detectors (e.g. AADS) flag
+    an anomaly candidate. Nominal streaming events NEVER trigger this payload.
+    """
 
     model_config = ConfigDict(frozen=True)
 
     event_id: str = Field(
-        default_factory=lambda: str(uuid4()), description="Unique anomaly event identifier"
+        default_factory=lambda: str(uuid4()),
+        description="Unique anomaly event identifier",
     )
-    timestamp: datetime = Field(
-        description="Timestamp when the anomalous data point occurred"
+    timestamp: float = Field(
+        description="Unix timestamp when the anomalous metric event occurred",
     )
-    metric_id: str = Field(
-        description="Stream/KPI identifier experiencing the anomaly"
+    dataset: str = Field(
+        default="AIOPS_KPI",
+        description="Name of the underlying cloud metric dataset/stream source",
     )
-    value: float = Field(
-        description="Observed anomalous metric value"
-    )
-    detector_name: str = Field(
-        default="AADS", description="Name of the streaming detector triggering the event"
+    features: Dict[str, Any] = Field(
+        default_factory=dict,
+        description="Exact original event attributes (metric_id, value, ground_truth)",
     )
     anomaly_score: float = Field(
-        description="Continuous anomaly score assigned by the baseline detector"
+        description="Continuous anomaly confidence score from 0.0 to 1.0",
     )
-    threshold: float = Field(
-        description="Decision threshold active when the event was flagged"
+    detector: str = Field(
+        default="AADS",
+        description="Identifier of the streaming detector that flagged the event",
     )
-    window_mean: float = Field(
-        description="Mean of the sliding baseline window at trigger time"
+    recent_window_summary: Dict[str, float] = Field(
+        default_factory=dict,
+        description="Context summary statistics (mean, std, min, max, z_score)",
     )
-    window_std: float = Field(
-        description="Standard deviation of the sliding baseline window at trigger time"
+    anomaly_frequency: float = Field(
+        default=0.0,
+        description="Recent frequency rate of anomaly triggers in the sliding window",
     )
-    recent_window: list[float] = Field(
-        default_factory=list, description="Recent metric values for agentic context analysis"
+    recent_detector_metrics: Dict[str, Any] = Field(
+        default_factory=dict,
+        description="First-stage detector operational health metrics (throughput, latency, memory)",
     )
-    ground_truth_label: int | None = Field(
-        default=None, description="Ground truth benchmark label if available"
-    )
+
+    # Convenience aliases for backwards compatibility
+    @property
+    def metric_id(self) -> str:
+        return str(self.features.get("metric_id", "default"))
+
+    @property
+    def value(self) -> float:
+        return float(self.features.get("value", 0.0))
+
+    @property
+    def detector_name(self) -> str:
+        return self.detector
