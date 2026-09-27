@@ -1,4 +1,5 @@
-"""Relational database persistence models and queries for decisions and anomalies.
+"""Relational Database Storage Package."""
 
-Scheduled for implementation in Phase 11.
-"""
+from src.agentic_streaming.storage.relational_storage import RelationalStorageManager
+
+__all__ = ["RelationalStorageManager"]

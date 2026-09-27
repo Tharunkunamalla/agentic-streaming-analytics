@@ -97,7 +97,8 @@ def test_streaming_agent_workflow_execution():
     assert state["action"] in {a.value for a in AgentAction}
 
     # Validate tool execution
-    assert state["tool_result"]["status"] == "COMPLETED"
+    assert state["tool_result"]["success"] is True
+    assert "tool" in state["tool_result"]
 
     # Validate Pydantic AgentDecision payload
     assert decision.event_id == "evt-wf-100"

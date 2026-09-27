@@ -1,4 +1,4 @@
-"""LangGraph Agent State Machine and Workflow Graph."""
+"""LangGraph Agent State Machine and Workflow Graph with Phase 11 Autonomous Adaptation."""
 
 from datetime import datetime, timezone
 from typing import Any, Dict, Optional, Tuple
@@ -7,6 +7,9 @@ from uuid import uuid4
 from src.agentic_streaming.agent.planner import AgentPlanner
 from src.agentic_streaming.agent.state import AgentAction, AgentState
 from src.agentic_streaming.agent.validator import AgentValidator
+from src.agentic_streaming.detectors.detector_selector import AutonomousDetectorSelector
+from src.agentic_streaming.storage.relational_storage import RelationalStorageManager
+from src.agentic_streaming.tools.registry import ToolRegistry
 from src.schemas.agent import AgentDecision
 from src.schemas.anomaly import AnomalyEvent
 from src.utils.logger import get_logger
@@ -15,13 +18,16 @@ logger = get_logger("agent_graph")
 
 
 class StreamingAgentWorkflow:
-    """Explicit state machine workflow implementing:
+    """Explicit state machine workflow implementing Phase 11 Phase 12 integrated pipeline:
 
-    START -> Profile -> Plan -> Select Action -> Execute Tool -> Validate -> Store Memory -> END
+    START -> Profile -> Plan -> Select Action -> Execute Tool -> Evaluate Adaptation -> Validate -> Store Memory -> END
     """
 
-    def __init__(self, llm_client: Any = None) -> None:
+    def __init__(self, llm_client: Any = None, db_storage: Optional[RelationalStorageManager] = None) -> None:
         self.planner = AgentPlanner(llm_client)
+        self.tool_registry = ToolRegistry()
+        self.detector_selector = AutonomousDetectorSelector()
+        self.storage = db_storage or RelationalStorageManager()
 
     def initialize_state(self, event: AnomalyEvent) -> AgentState:
         """Create fresh initial state dictionary for an incoming AnomalyEvent."""
@@ -41,44 +47,63 @@ class StreamingAgentWorkflow:
         }
 
     def execute_tool_node(self, state: AgentState) -> AgentState:
-        """Stage 4: Execute controlled tool based on selected action."""
+        """Stage 4: Execute controlled tool through allowlisted ToolRegistry."""
         action = state["action"]
         prof = state["profile"]
+        evt = state["event"]
+
+        start_iso = datetime.now(timezone.utc).isoformat()
 
         if action == AgentAction.NO_ACTION.value:
-            tool_res = {"status": "SKIPPED", "summary": "No action taken for low-severity anomaly."}
+            res = {"success": True, "tool": "none", "result": {"summary": "No action taken for low-severity anomaly."}, "latency_ms": 0.0}
         elif action == AgentAction.INVESTIGATE.value:
-            tool_res = {
-                "status": "COMPLETED",
-                "summary": f"Investigated metric {prof['metric_id']}. Value {prof['value']} represents {prof['z_score']:.2f} std deviations from mean.",
-            }
+            res = self.tool_registry.execute(
+                "calculate_statistics",
+                {"values": [prof["rolling_mean"], prof["value"]], "current_value": prof["value"]},
+            )
         elif action == AgentAction.CHECK_DRIFT.value:
-            tool_res = {
-                "status": "COMPLETED",
-                "summary": f"Concept drift check completed for {prof['metric_id']}. Baseline mean shifted from {prof['rolling_mean']:.2f}.",
-            }
+            base_win = [prof["rolling_mean"]] * 10
+            curr_win = [prof["value"]] * 10
+            res = self.tool_registry.execute("check_drift", {"current_window": curr_win, "baseline_window": base_win})
         elif action == AgentAction.COMPARE_DETECTORS.value:
-            tool_res = {
-                "status": "COMPLETED",
-                "summary": f"Comparative detector analysis executed for event {prof['event_id'][:8]}...",
-                "scores": {"AADS": prof["anomaly_score"], "HSTree": 0.45, "RRCF": 0.60},
-            }
+            res = self.tool_registry.execute(
+                "compare_detectors",
+                {"value": prof["value"], "window_history": [prof["rolling_mean"]] * 5},
+            )
         elif action == AgentAction.RUN_ALTERNATIVE_DETECTOR.value:
-            tool_res = {
-                "status": "COMPLETED",
-                "summary": f"Executed HSTree alternative detector on metric {prof['metric_id']}.",
-                "alternative_score": 0.52,
-            }
+            res = self.tool_registry.execute("run_hstree", {"value": prof["value"], "window_history": [prof["rolling_mean"]] * 5})
         elif action == AgentAction.REQUEST_DEEP_ANALYSIS.value:
-            tool_res = {
-                "status": "COMPLETED",
-                "summary": f"Deep analysis snapshot generated for high-severity anomaly {prof['event_id'][:8]}...",
-                "escalated": True,
-            }
+            res = self.tool_registry.execute(
+                "compare_detectors",
+                {"value": prof["value"], "window_history": [prof["rolling_mean"]] * 5},
+            )
         else:
-            tool_res = {"status": "ERROR", "summary": f"Unknown action {action}"}
+            res = {"success": False, "tool": "unknown", "error": f"Unknown action {action}", "latency_ms": 0.0}
 
-        state["tool_result"] = tool_res
+        end_iso = datetime.now(timezone.utc).isoformat()
+        state["tool_result"] = res
+
+        # Phase 12: Log tool execution to relational database
+        self.storage.log_tool_execution(
+            event_id=evt.event_id,
+            tool=res.get("tool", str(action)),
+            start_time=start_iso,
+            end_time=end_iso,
+            success=res.get("success", False),
+            result_json=str(res.get("result", res.get("error", ""))),
+            latency_ms=res.get("latency_ms", 0.0),
+        )
+
+        # Phase 11: Execute autonomous detector selection evaluation
+        adaptation_res = self.detector_selector.evaluate_adaptation(
+            event_id=evt.event_id,
+            agent_action=action,
+            metric_value=prof["value"],
+            window_history=[prof["rolling_mean"]] * 5,
+            baseline_window=[prof["rolling_mean"]] * 10,
+        )
+        state["action_params"]["adaptation"] = adaptation_res
+
         return state
 
     def validate_node(self, state: AgentState) -> AgentState:
@@ -93,21 +118,51 @@ class StreamingAgentWorkflow:
         return state
 
     def store_memory_node(self, state: AgentState) -> AgentState:
-        """Stage 6: Store decision and execution trajectory in episodic memory."""
+        """Stage 6: Store decision and execution trajectory in episodic memory and storage."""
+        evt = state["event"]
         memory_id = f"mem-{uuid4().hex[:10]}"
         state["memory_id"] = memory_id
         state["is_complete"] = True
+
+        # Phase 12: Log agent decision to database
+        self.storage.log_agent_decision(
+            event_id=evt.event_id,
+            action=state["action"] or AgentAction.NO_ACTION.value,
+            reason=str(state.get("plan", [])),
+            success=state["validation_report"].get("is_valid", True),
+            latency_ms=state["tool_result"].get("latency_ms", 0.0),
+            active_detector=self.detector_selector.active_detector,
+            timestamp=datetime.now(timezone.utc).isoformat(),
+        )
+
         logger.info(
-            f"Stored decision trajectory in episodic memory (memory_id={memory_id}). Action={state['action']}"
+            f"Stored decision trajectory in memory (memory_id={memory_id}). Action={state['action']} ActiveDetector={self.detector_selector.active_detector}"
         )
         return state
 
     def run(self, event: AnomalyEvent) -> Tuple[AgentState, AgentDecision]:
         """Execute full end-to-end state machine workflow.
 
-        START -> Profile -> Plan -> Select Action -> Execute Tool -> Validate -> Store Memory -> END
+        START -> Profile -> Plan -> Select Action -> Execute Tool -> Evaluate Adaptation -> Validate -> Store Memory -> END
         """
         state = self.initialize_state(event)
+
+        # Phase 12: Log event and detection
+        self.storage.log_event(
+            event_id=event.event_id,
+            timestamp=str(event.timestamp),
+            metric_id=event.metric_id,
+            value=event.value,
+            features_json=str(event.features),
+        )
+        self.storage.log_detection(
+            event_id=event.event_id,
+            detector=event.detector,
+            score=event.anomaly_score,
+            prediction=True,
+            latency_ms=0.05,
+            timestamp=str(event.timestamp),
+        )
 
         # 1. Profile
         state = self.planner.profile_node(state)

@@ -19,8 +19,8 @@ Track the development lifecycle for **An Agentic AI Framework for Autonomous Str
 | **Phase 8** | LangGraph agent state machine & decision node | **Completed** |
 | **Phase 9** | Controlled agent tools & allowlisted registry | **Completed** |
 | **Phase 10** | Simple durable SQLite memory & event retrieval | **Completed** |
-| **Phase 11** | Database storage & Grafana dashboard provisioning | Pending |
-| **Phase 12** | Comprehensive comparative experiments | Pending |
+| **Phase 11** | Autonomous analytical & detector selection policy | **Completed** |
+| **Phase 12** | Relational database storage (events, detections, decisions, tools) | **Completed** |
 | **Phase 13** | Report artifacts, figures & demonstration package | Pending |
 
 ---
@@ -151,15 +151,30 @@ Track the development lifecycle for **An Agentic AI Framework for Autonomous Str
 - [x] Implemented `store_decision()` and `retrieve_similar_events()` for simple episodic memory lookup.
 - [x] Unit test suite (`tests/unit/test_memory.py`) proving stored events can be retrieved. All 49 test cases passing cleanly.
 
-### Phase 11: Persistent Storage & Grafana Dashboards
-- [ ] PostgreSQL / SQLite relational tables for anomaly logs, decisions, and tool traces.
-- [ ] Provision Grafana data sources and real-time streaming dashboards.
-- [ ] Visual telemetry: Stream metrics, anomaly markers, agent actions, and latency metrics.
+### Phase 11: Autonomous Detector Selection Policy
+- [x] Implemented deterministic detector adaptation engine (`src/agentic_streaming/detectors/detector_selector.py`).
+- [x] Closed workflow execution path:
+  1. AADS flags anomaly event.
+  2. Compact context payload built (`current_event`, `recent_window`, `anomaly`, `detector`).
+  3. Memory lookup for similar historical trajectories.
+  4. Agent selects analysis action (`CHECK_DRIFT` or `COMPARE_DETECTORS`).
+  5. Tool executed via allowlisted `ToolRegistry`.
+  6. Results validated.
+  7. If concept drift indicated (PSI > 0.20): multi-detector benchmark executed.
+  8. Empirical benchmark results evaluated using deterministic policy rule to select best detector for next window (LLM requests analysis, empirical experiment decides detector).
+  9. Decision and adaptation record logged.
+  10. Streaming pipeline continues without source code modification.
 
-### Phase 12: Empirical Experiments & Comparative Evaluation
-- [ ] Experiment 1: AADS Baseline vs. AADS + Agentic Layer.
-- [ ] Experiment 2: Multi-detector performance under synthetic & real concept drifts.
-- [ ] Experiment 3: Agent decision accuracy, unnecessary tool call rates, and latency overhead.
+### Phase 12: Relational Database Storage
+- [x] Implemented `RelationalStorageManager` (`src/agentic_streaming/storage/relational_storage.py`) writing to SQLite database (`data/streaming_analytics.db`).
+- [x] Relational schema implemented:
+  - `events` (`event_id`, `timestamp`, `metric_id`, `value`, `features_json`)
+  - `detections` (`detection_id`, `event_id`, `detector`, `score`, `prediction`, `latency_ms`, `timestamp`)
+  - `agent_decisions` (`decision_id`, `event_id`, `action`, `reason`, `success`, `latency_ms`, `active_detector`, `timestamp`)
+  - `tool_executions` (`execution_id`, `event_id`, `tool`, `start_time`, `end_time`, `success`, `result_json`, `latency_ms`)
+  - `experiments` (`experiment_id`, `name`, `start_time`, `end_time`, `config_json`, `status`)
+  - `metrics` (`metric_id`, `experiment_id`, `timestamp`, `precision`, `recall`, `f1`, `fpr`, `latency_ms`, `throughput_eps`, `active_detector`)
+- [x] Unit test suite (`tests/unit/test_phase11_phase12.py`) verifying detector adaptation policy, relational table insertions, and workflow integration. All tests passing cleanly.
 
 ### Phase 13: Report Artifacts & Demonstration Package
 - [ ] Generate figures, confusion matrices, and ablation tables.
