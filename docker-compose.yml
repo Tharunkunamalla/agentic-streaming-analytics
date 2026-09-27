@@ -94,7 +94,8 @@ services:
       - GF_USERS_ALLOW_SIGN_UP=false
     volumes:
       - grafana_data:/var/lib/grafana
-      - ./dashboards/grafana/provisioning:/etc/grafana/provisioning
+      - ./docker/grafana/provisioning:/etc/grafana/provisioning
+      - ./data:/var/lib/grafana/data
     depends_on:
       - postgres
 
