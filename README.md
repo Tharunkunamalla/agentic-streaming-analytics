@@ -13,63 +13,62 @@ This project implements a **two-stage hierarchical framework**:
 2. **Agentic Orchestration Layer (Second Stage):** Only verified anomaly candidates are published to an `anomaly-events` Kafka topic. A LangGraph-based agent consumes these events and executes structured analytical tools (drift detection, multi-detector benchmarking, and episodic memory lookup) to reach a validated operational decision.
 
 ```
-                  STREAMAD DATASET
-                         │
-                         ▼
-                 Python Replay
-                    Producer
-                         │
-                         ▼
-                ┌────────────────┐
-                │     KAFKA      │
-                │  raw-metrics   │
-                └───────┬────────┘
-                        │
-                        ▼
-              ┌───────────────────┐
-              │ Spark Structured   │
-              │ Streaming          │
-              └─────────┬─────────┘
-                        │
-                        ▼
-                 ┌────────────┐
-                 │    AADS    │
-                 │  Baseline  │
-                 └─────┬──────┘
-                       │
-              ┌────────┴────────┐
-              │                 │
-            NORMAL           ANOMALY
-                                │
-                                ▼
-                       Context Builder
-                                │
-                                ▼
-                       ┌────────────────┐
-                       │   LangGraph    │
-                       │     Agent      │
-                       └───────┬────────┘
-                               │
-                 ┌─────────────┼─────────────┐
-                 ▼             ▼             ▼
-             Statistics      Drift       Detector
-                Tool          Tool       Comparison
-                 │             │             │
-                 └─────────────┼─────────────┘
-                               ▼
-                           Validator
-                               │
-                               ▼
-                            Memory
-                               │
-                               ▼
-                       Final Decision
-                               │
-                               ▼
-                           Database
-                               │
-                               ▼
-                            Grafana
+                         ┌─────────────────────┐
+                         │      DATASET        │
+                         └──────────┬──────────┘
+                                    │
+                                    ▼
+                         ┌─────────────────────┐
+                         │   Kafka Producer    │
+                         └──────────┬──────────┘
+                                    │
+                                    ▼
+                         ┌─────────────────────┐
+                         │       KAFKA         │
+                         └──────────┬──────────┘
+                                    │
+                                    ▼
+                         ┌─────────────────────┐
+                         │       SPARK         │
+                         └──────────┬──────────┘
+                                    │
+                                    ▼
+                         ┌─────────────────────┐
+                         │       AADS          │
+                         └──────────┬──────────┘
+                                    │
+                              anomaly?
+                              /      \
+                            no        yes
+                            │          │
+                            │          ▼
+                            │     ┌───────────┐
+                            │     │   AGENT   │
+                            │     └─────┬─────┘
+                            │           │
+                            │       ┌───┼───┐
+                            │       ▼   ▼   ▼
+                            │      Tools/Memory
+                            │           │
+                            │           ▼
+                            │       Decision
+                            │
+                            └──────────┬──────────
+                                       │
+                                       ▼
+                              ┌────────────────┐
+                              │    DATABASE    │
+                              └───────┬────────┘
+                                      │
+                        ┌─────────────┴─────────────┐
+                        ▼                           ▼
+                 ┌─────────────┐             ┌─────────────┐
+                 │   GRAFANA   │             │ EXPERIMENTS │
+                 │ LIVE VIEW   │             │ Python      │
+                 └─────────────┘             └─────────────┘
+                        │                           │
+                        ▼                           ▼
+                   DEMO UI                    REPORT TABLES
 ```
 
 ---

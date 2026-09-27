@@ -166,44 +166,110 @@ When presenting or explaining this project, emphasize the following **4 key narr
 ### Pillar 3: Controlled Analytical Tools & Deterministic Adaptation
 > "The agent does NOT execute arbitrary shell code or make ungrounded decisions. Instead, it interacts with an allowlisted `ToolRegistry` to run precise statistical tools (`calculate_statistics`, `check_drift`, `compare_detectors`). If drift is detected (measured via Kolmogorov-Smirnov test and Population Stability Index > 0.20), a **Deterministic Adaptation Engine** automatically switches the active streaming detector to the best-performing algorithm (e.g., switching to xStream or HSTree) for the next evaluation window."
 
-### Pillar 4: Empirical Rigor & Full Observability
-> "All agent actions, tool executions, and stream telemetry are persisted in a relational SQLite database (`streaming_analytics.db`) and an episodic memory store (`memory.db`). Real-time operations are visualized on a custom Grafana dashboard showing live events/sec, anomaly markers, agent actions, decision latency, and current active detector."
+### Pillar 4: Empirical Rigor & Full O---
+
+## 5. The Three Output Layers & Presentation Strategy
+
+Our project produces **three distinct output layers**, each serving a specific engineering and academic evaluation purpose:
+
+### Layer 1: Terminal Log Stream (Engineering & Debugging)
+Provides real-time CLI logs during execution:
+```
+[Kafka] Connected to bootstrap server localhost:9092
+[Producer] Replaying event 1245 (value=92.5, ground_truth=1)
+[Spark] Processed 1245 micro-batch events
+[AADS] Candidate anomaly detected (score=0.91) -> Published to anomaly-events
+[Agent] Action selected: CHECK_DRIFT
+[Tool] check_drift executed in 42 ms (PSI=0.28, KS-pvalue=0.008)
+[Agent] Decision: POSSIBLE_CONCEPT_DRIFT -> Active detector adapted to xStream
+```
+
+### Layer 2: Research Evaluation & Report Artifacts (Scientific Benchmark)
+Provides reproducible quantitative evaluation results saved in `experiments/results/`:
+- `metrics.csv` & `metrics.json`
+- `precision_recall_f1.png`
+- `latency.png`
+- `throughput.png`
+- `anomaly_timeline.png`
+- `comparison_table.csv`
+
+#### Result Metrics Evaluated:
+- **Detection Performance:** Precision, Recall, F1-Score, False Positive Rate (FPR).
+- **Streaming Telemetry:** Throughput (events/sec), Classification Latency (ms), Memory Usage (MB).
+- **Agent Telemetry:** Decision Accuracy (%), Decision Success Rate (%), Avg Decision Latency (ms), Unnecessary Tool Calls.
+- **Adaptation Telemetry:** Concept Drift Detection Accuracy, Detector Switch Frequency, Recovery Time.
+
+### Layer 3: Real-Time Grafana Application Dashboard (Live Demonstration UI)
+The primary live presentation application. When the professor views the demonstration:
+1. **Live Stream Active:** `Events/sec: 50` updates continuously.
+2. **Anomaly Arrives:** Counter increments `Anomalies: 1` and marks anomaly spike on live stream graph.
+3. **Agent Triage Triggers:** `Latest Agent Decision` panel updates:
+   - *Action:* `CHECK_DRIFT`
+   - *Result:* `Distribution change detected (PSI=0.28)`
+4. **Autonomous Adaptation:** `Current Detector` status updates from `AADS` $\rightarrow$ `xStream`.
 
 ---
 
-## 5. System Workflow Diagram
+## 6. System Architecture Diagram
 
 ```
-                 REAL-TIME CLOUD KPI STREAM
-                             │
-                             ▼
-                ┌─────────────────────────┐
-                │ Kafka Replay Producer   │
-                └────────────┬────────────┘
-                             │
-                             ▼
-                ┌─────────────────────────┐
-                │  Kafka raw-metrics      │
-                └────────────┬────────────┘
-                             │
-                             ▼
-                ┌─────────────────────────┐
-                │ Spark Structured        │
-                │ Streaming + AADS        │
-                └────────────┬────────────┘
-                             │
-             ┌───────────────┴───────────────┐
-             ▼                               ▼
-      NOMINAL METRIC                  ANOMALY CANDIDATE
-    (Filtered, 0 cost)                       │
-                                             ▼
-                                  ┌────────────────────┐
-                                  │ Kafka              │
-                                  │ anomaly-events     │
-                                  └──────────┬─────────┘
-                                             │
-                                             ▼
-                                  ┌────────────────────┐
+                         ┌─────────────────────┐
+                         │      DATASET        │
+                         └──────────┬──────────┘
+                                    │
+                                    ▼
+                         ┌─────────────────────┐
+                         │   Kafka Producer    │
+                         └──────────┬──────────┘
+                                    │
+                                    ▼
+                         ┌─────────────────────┐
+                         │       KAFKA         │
+                         └──────────┬──────────┘
+                                    │
+                                    ▼
+                         ┌─────────────────────┐
+                         │       SPARK         │
+                         └──────────┬──────────┘
+                                    │
+                                    ▼
+                         ┌─────────────────────┐
+                         │       AADS          │
+                         └──────────┬──────────┘
+                                    │
+                              anomaly?
+                              /      \
+                            no        yes
+                            │          │
+                            │          ▼
+                            │     ┌───────────┐
+                            │     │   AGENT   │
+                            │     └─────┬─────┘
+                            │           │
+                            │       ┌───┼───┐
+                            │       ▼   ▼   ▼
+                            │      Tools/Memory
+                            │           │
+                            │           ▼
+                            │       Decision
+                            │
+                            └──────────┬──────────
+                                       │
+                                       ▼
+                              ┌────────────────┐
+                              │    DATABASE    │
+                              └───────┬────────┘
+                                      │
+                        ┌─────────────┴─────────────┐
+                        ▼                           ▼
+                 ┌─────────────┐             ┌─────────────┐
+                 │   GRAFANA   │             │ EXPERIMENTS │
+                 │ LIVE VIEW   │             │ Python      │
+                 └─────────────┘             └─────────────┘
+                        │                           │
+                        ▼                           ▼
+                   DEMO UI                    REPORT TABLES
+```�──────────┐
                                   │ LangGraph Agent    │
                                   └──────────┬─────────┘
                                              │
