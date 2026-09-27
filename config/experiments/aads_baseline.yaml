@@ -1,0 +1,32 @@
+# Reproducible Configuration for AADS Baseline Evaluation
+experiment_name: "aads_baseline_aiops_kpi"
+description: "Empirical evaluation of standalone AADS baseline on cloud KPI time-series stream"
+seed: 42
+
+dataset:
+  path: "data/sample/aiops_kpi_sample.csv"
+  full_path: "data/processed/aiops_kpi_clean.csv"
+  limit: 10000
+  time_col: "timestamp"
+  value_col: "value"
+  label_col: "ground_truth"
+
+detector:
+  name: "AADS"
+  density_window_size: 100
+  density_z_threshold: 2.5
+  density_decay_alpha: 0.05
+  cluster_radius_factor: 0.5
+  max_minor_cluster_size: 3
+  cluster_support_ratio_threshold: 0.05
+  cluster_max_idle_steps: 500
+
+output:
+  results_dir: "experiments/results"
+  metrics_json: "experiments/results/aads_baseline_metrics.json"
+  metrics_csv: "experiments/results/aads_baseline_metrics.csv"
+  plots:
+    precision_recall_f1: "experiments/results/precision_recall_f1.png"
+    latency: "experiments/results/latency.png"
+    throughput: "experiments/results/throughput.png"
+    anomaly_timeline: "experiments/results/anomaly_timeline.png"

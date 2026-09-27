@@ -124,6 +124,33 @@ class AADSDetector:
         """Process a batch of records sequentially simulating online stream arrivals."""
         return [self.detect_one(r) for r in records]
 
+    def process_event(
+        self,
+        event_id: str,
+        timestamp: float,
+        value: float,
+        metric_id: str = "default",
+    ) -> Dict[str, Any]:
+        """Convenience method taking explicit event fields."""
+        return self.detect_one({
+            "event_id": event_id,
+            "timestamp": timestamp,
+            "value": value,
+            "metric_id": metric_id,
+        })
+
+    def fit_score(self, event: Any) -> float:
+        """Standardized single-event fit and scoring interface."""
+        if isinstance(event, (int, float)):
+            res = self.detect_one({"value": float(event)})
+        elif hasattr(event, "__len__") and len(event) == 1:
+            res = self.detect_one({"value": float(event[0])})
+        elif isinstance(event, dict):
+            res = self.detect_one(event)
+        else:
+            res = self.detect_one({"value": float(getattr(event, "value", event))})
+        return float(res["anomaly_score"] or (1.0 if res["is_anomaly"] else 0.0))
+
     def reset(self) -> None:
         """Reset internal streaming memory across all metric streams."""
         self.density_estimators.clear()
