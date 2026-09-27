@@ -15,7 +15,7 @@ Track the development lifecycle for **An Agentic AI Framework for Autonomous Str
 | **Phase 4** | AADS streaming anomaly detection baseline | **Completed** |
 | **Phase 5** | Baseline evaluation (Precision, Recall, F1, Latency) | **Completed** |
 | **Phase 6** | StreamAD comparison detectors (xStream, HSTree, RRCF) | **Completed** |
-| **Phase 7** | Anomaly event Kafka pipeline & context builder | Pending |
+| **Phase 7** | Anomaly event Kafka pipeline & context builder | **Completed** |
 | **Phase 8** | LangGraph agent state machine & decision node | Pending |
 | **Phase 9** | Agent analytical tools & vector memory | Pending |
 | **Phase 10** | Autonomous detector/analysis selection logic | Pending |
@@ -114,9 +114,13 @@ Track the development lifecycle for **An Agentic AI Framework for Autonomous Str
 - [x] Complete unit test suite verifying all streaming detectors (`tests/unit/test_detectors.py`). All 41 tests passing.
 
 ### Phase 7: Anomaly Event Pipeline & Context Builder
-- [ ] Publish detected anomaly events to Kafka `anomaly-events` topic.
-- [ ] Build contextual window buffers (pre/post anomaly snapshots, summary stats).
-- [ ] Asynchronous event consumer boundary isolating streaming from agentic reasoning.
+- [x] Standardized `AnomalyEvent` payload schema (`src/schemas/anomaly.py`) storing event_id, timestamp, dataset, features, anomaly_score, detector, recent_window_summary, anomaly_frequency, and recent_detector_metrics.
+- [x] Connected Spark streaming pipeline to AADS baseline (`src/agentic_streaming/streaming/pipeline.py`):
+  - Streamed events: `Kafka raw-metrics -> Spark -> AADS`.
+  - Nominal events are filtered and NEVER trigger the anomaly topic or LLM agent.
+  - Flagged anomaly candidates emit structured `AnomalyEvent` payloads to Kafka `anomaly-events` topic.
+- [x] End-to-end integration test (`tests/integration/test_anomaly_event_pipeline.py`) proving real Kafka data flow (`dataset -> Kafka -> Spark -> AADS -> anomaly-events`).
+- [x] Unit test verifying pipeline anomaly integration (`tests/unit/test_streaming_pipeline_anomaly.py`).
 
 ### Phase 8: LangGraph Agent Core
 - [ ] Define LangGraph agent state graph and decision nodes.
