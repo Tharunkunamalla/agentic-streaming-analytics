@@ -15,6 +15,7 @@ This project implements a **two-stage hierarchical framework**:
 ```
                          ┌─────────────────────┐
                          │      DATASET        │
+                         │     AIOPS_KPI       │
                          └──────────┬──────────┘
                                     │
                                     ▼
@@ -25,16 +26,19 @@ This project implements a **two-stage hierarchical framework**:
                                     ▼
                          ┌─────────────────────┐
                          │       KAFKA         │
+                         │    raw-metrics      │
                          └──────────┬──────────┘
                                     │
                                     ▼
                          ┌─────────────────────┐
                          │       SPARK         │
+                         │ Structured Streaming│
                          └──────────┬──────────┘
                                     │
                                     ▼
                          ┌─────────────────────┐
                          │       AADS          │
+                         │ Streaming Detector  │
                          └──────────┬──────────┘
                                     │
                               anomaly?
@@ -44,20 +48,24 @@ This project implements a **two-stage hierarchical framework**:
                             │          ▼
                             │     ┌───────────┐
                             │     │   AGENT   │
+                            │     │ LangGraph │
                             │     └─────┬─────┘
                             │           │
                             │       ┌───┼───┐
                             │       ▼   ▼   ▼
                             │      Tools/Memory
+                            │     (Registry/SQLite)
                             │           │
                             │           ▼
-                            │       Decision
+                            │       Decision &
+                            │   Detector Adaptation
                             │
                             └──────────┬──────────
                                        │
                                        ▼
                               ┌────────────────┐
                               │    DATABASE    │
+                              │ SQLite/Postgres│
                               └───────┬────────┘
                                       │
                         ┌─────────────┴─────────────┐
@@ -65,10 +73,12 @@ This project implements a **two-stage hierarchical framework**:
                  ┌─────────────┐             ┌─────────────┐
                  │   GRAFANA   │             │ EXPERIMENTS │
                  │ LIVE VIEW   │             │ Python      │
-                 └─────────────┘             └─────────────┘
+                 │(Operational)│             │ (Research)  │
+                 └──────┬──────┘             └──────┬──────┘
                         │                           │
                         ▼                           ▼
-                   DEMO UI                    REPORT TABLES
+                     LIVE DEMO                REPORT TABLES &
+                     DASHBOARD                 PLOTS (.png)
 ```
 
 ---
