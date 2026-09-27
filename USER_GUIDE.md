@@ -106,6 +106,10 @@ python -m venv .venv
 python scripts/check_env.py
 ```
 
+<!-- .\.venv\Scripts\Activate.ps1
+python scripts/check_env.py -->
+
+
 ### Step 2: Run the Unit & Integration Test Suite
 Execute the comprehensive test suite verifying detector algorithms, agent state machine, tool registry, and memory persistence:
 ```bash
