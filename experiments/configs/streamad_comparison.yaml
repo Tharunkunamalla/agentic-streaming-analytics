@@ -1,0 +1,5 @@
+# StreamAD comparison detectors configuration
+experiment_name: streamad_comparison
+detectors: [AADS, xStream, HSTree, RRCF]
+agent_enabled: false
+eval_samples: 5000

@@ -21,7 +21,9 @@ Track the development lifecycle for **An Agentic AI Framework for Autonomous Str
 | **Phase 10** | Simple durable SQLite memory & event retrieval | **Completed** |
 | **Phase 11** | Autonomous analytical & detector selection policy | **Completed** |
 | **Phase 12** | Relational database storage (events, detections, decisions, tools) | **Completed** |
-| **Phase 13** | Report artifacts, figures & demonstration package | Pending |
+| **Phase 13** | Grafana real-time monitoring dashboard & telemetry | **Completed** |
+| **Phase 14** | Ablation study configs, stream-rate benchmark & decision evaluator | **Completed** |
+| **Phase 15** | Comparative results generation & final report artifacts | Pending |
 
 ---
 
@@ -176,7 +178,28 @@ Track the development lifecycle for **An Agentic AI Framework for Autonomous Str
   - `metrics` (`metric_id`, `experiment_id`, `timestamp`, `precision`, `recall`, `f1`, `fpr`, `latency_ms`, `throughput_eps`, `active_detector`)
 - [x] Unit test suite (`tests/unit/test_phase11_phase12.py`) verifying detector adaptation policy, relational table insertions, and workflow integration. All tests passing cleanly.
 
-### Phase 13: Report Artifacts & Demonstration Package
-- [ ] Generate figures, confusion matrices, and ablation tables.
-- [ ] Finalize technical documentation and course mini-project report.
-- [ ] End-to-end replay demo script for presentation.
+### Phase 13: Grafana Real-Time Monitoring Dashboard
+- [x] Provisioned Grafana SQLite datasource (`docker/grafana/provisioning/datasources/sqlite.yaml`).
+- [x] Created automatic dashboard provider (`docker/grafana/provisioning/dashboards/dashboards.yaml`).
+- [x] Created agentic streaming analytics Grafana dashboard layout (`docker/grafana/provisioning/dashboards/agentic_streaming_dashboard.json`):
+  - Stat cards: Events/sec, Anomalies, AADS F1, Agent decisions, Avg agent latency.
+  - Time-series panel: Live metric stream with anomaly markers.
+  - Table panel: Recent agent actions, tool results, and distribution change flags.
+  - Current detector status card.
+
+### Phase 14: Experiment Framework & Ablation Configurations
+- [x] Created experiment configuration matrix (`experiments/configs/`):
+  - `baseline_aads.yaml` (AADS standalone baseline)
+  - `streamad_comparison.yaml` (HSTree, xStream, RRCF benchmark)
+  - `agent_no_memory.yaml` (AADS + Agent without episodic memory)
+  - `agent_with_memory.yaml` (AADS + Agent + SQLite memory)
+  - `full_proposed.yaml` (AADS + Agent + Memory + Adaptation Policy)
+- [x] Stream-rate benchmark suite configured (`STREAM_RATE=1, 10, 50, 100`).
+- [x] Implemented scenario-based decision evaluation engine (`src/agentic_streaming/metrics/agent_evaluator.py`) measuring decision accuracy against ground truth scenarios (isolated strong anomaly, repeated anomaly, uncertain behavior, distribution change, no evidence).
+
+### Phase 15: Comparative Results Generation & Report Artifacts
+- [ ] Execute full ablation study matrix and populate empirical results table template:
+  - **Detection Performance:** Precision, Recall, F1, FPR.
+  - **Streaming System Performance:** Throughput, Classification Latency, Memory Usage.
+  - **Agent Decision Metrics:** Decision accuracy, Decision success, Avg decision latency, Unnecessary tool calls, LLM calls, Cost.
+  - **Adaptation Performance:** Drift detection accuracy, Detector switches, Recovery time.

@@ -1,0 +1,7 @@
+# AADS + Agent without episodic memory
+experiment_name: agent_no_memory
+detector: AADS
+agent_enabled: true
+memory_enabled: false
+adaptation_enabled: false
+eval_samples: 50000

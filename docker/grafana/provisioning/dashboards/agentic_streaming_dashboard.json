@@ -1,0 +1,133 @@
+{
+  "annotations": {
+    "list": []
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": null,
+  "links": [],
+  "liveNow": true,
+  "panels": [
+    {
+      "gridPos": { "h": 4, "w": 4, "x": 0, "y": 0 },
+      "id": 1,
+      "title": "Events/sec",
+      "type": "stat",
+      "targets": [
+        {
+          "datasource": { "type": "frser-sqlite-datasource", "uid": "SQLite_Analytics" },
+          "queryType": "randomWalk",
+          "rawQuery": true,
+          "query": "SELECT COUNT(*) / 10.0 FROM events WHERE timestamp >= datetime('now', '-10 seconds');",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "gridPos": { "h": 4, "w": 4, "x": 4, "y": 0 },
+      "id": 2,
+      "title": "Anomalies",
+      "type": "stat",
+      "targets": [
+        {
+          "datasource": { "type": "frser-sqlite-datasource", "uid": "SQLite_Analytics" },
+          "rawQuery": true,
+          "query": "SELECT COUNT(*) FROM detections WHERE prediction = 1;",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "gridPos": { "h": 4, "w": 5, "x": 8, "y": 0 },
+      "id": 3,
+      "title": "AADS F1",
+      "type": "stat",
+      "targets": [
+        {
+          "datasource": { "type": "frser-sqlite-datasource", "uid": "SQLite_Analytics" },
+          "rawQuery": true,
+          "query": "SELECT f1 FROM metrics WHERE active_detector='AADS' ORDER BY timestamp DESC LIMIT 1;",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "gridPos": { "h": 4, "w": 5, "x": 13, "y": 0 },
+      "id": 4,
+      "title": "Agent Decisions",
+      "type": "stat",
+      "targets": [
+        {
+          "datasource": { "type": "frser-sqlite-datasource", "uid": "SQLite_Analytics" },
+          "rawQuery": true,
+          "query": "SELECT COUNT(*) FROM agent_decisions;",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 0 },
+      "id": 5,
+      "title": "Avg Agent Latency",
+      "type": "stat",
+      "targets": [
+        {
+          "datasource": { "type": "frser-sqlite-datasource", "uid": "SQLite_Analytics" },
+          "rawQuery": true,
+          "query": "SELECT AVG(latency_ms) FROM agent_decisions;",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 4 },
+      "id": 6,
+      "title": "Metric Stream",
+      "type": "timeseries",
+      "targets": [
+        {
+          "datasource": { "type": "frser-sqlite-datasource", "uid": "SQLite_Analytics" },
+          "rawQuery": true,
+          "query": "SELECT timestamp, value FROM events ORDER BY timestamp ASC;",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "gridPos": { "h": 6, "w": 16, "x": 0, "y": 12 },
+      "id": 7,
+      "title": "Latest Agent Decision",
+      "type": "table",
+      "targets": [
+        {
+          "datasource": { "type": "frser-sqlite-datasource", "uid": "SQLite_Analytics" },
+          "rawQuery": true,
+          "query": "SELECT timestamp, action, reason FROM agent_decisions ORDER BY timestamp DESC LIMIT 5;",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "gridPos": { "h": 6, "w": 8, "x": 16, "y": 12 },
+      "id": 8,
+      "title": "Current Detector",
+      "type": "stat",
+      "targets": [
+        {
+          "datasource": { "type": "frser-sqlite-datasource", "uid": "SQLite_Analytics" },
+          "rawQuery": true,
+          "query": "SELECT active_detector FROM agent_decisions ORDER BY timestamp DESC LIMIT 1;",
+          "refId": "A"
+        }
+      ]
+    }
+  ],
+  "refresh": "5s",
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": ["streaming", "analytics", "agentic"],
+  "time": { "from": "now-1h", "to": "now" },
+  "title": "Agentic Streaming Analytics Dashboard",
+  "uid": "agentic-streaming-dashboard"
+}

@@ -1,0 +1,7 @@
+# Baseline AADS configuration
+experiment_name: baseline_aads
+detector: AADS
+agent_enabled: false
+memory_enabled: false
+adaptation_enabled: false
+eval_samples: 50000

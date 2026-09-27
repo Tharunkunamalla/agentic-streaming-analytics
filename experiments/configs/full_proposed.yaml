@@ -1,0 +1,8 @@
+# Proposed System: AADS + Agent + Memory + Deterministic Adaptation Policy
+experiment_name: full_proposed
+detector: AADS
+agent_enabled: true
+memory_enabled: true
+adaptation_enabled: true
+eval_samples: 50000
+stream_rates: [1, 10, 50, 100]
