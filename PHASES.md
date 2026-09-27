@@ -12,9 +12,9 @@ Track the development lifecycle for **An Agentic AI Framework for Autonomous Str
 | **Phase 2A** | Dataset acquisition & validation pipeline (AIOPS_KPI, manifest, sample) | **Completed** |
 | **Phase 2B** | Kafka infrastructure & dataset replay producer | **Completed** |
 | **Phase 3** | Spark Structured Streaming pipeline | **Completed** |
-| **Phase 4** | AADS streaming anomaly detection baseline | Pending |
-| **Phase 5** | Baseline evaluation (Precision, Recall, F1, Latency) | Pending |
-| **Phase 6** | StreamAD comparison detectors (xStream, HSTree, RRCF) | Pending |
+| **Phase 4** | AADS streaming anomaly detection baseline | **Completed** |
+| **Phase 5** | Baseline evaluation (Precision, Recall, F1, Latency) | **Completed** |
+| **Phase 6** | StreamAD comparison detectors (xStream, HSTree, RRCF) | **Completed** |
 | **Phase 7** | Anomaly event Kafka pipeline & context builder | Pending |
 | **Phase 8** | LangGraph agent state machine & decision node | Pending |
 | **Phase 9** | Agent analytical tools & vector memory | Pending |
