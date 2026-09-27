@@ -16,7 +16,7 @@ Track the development lifecycle for **An Agentic AI Framework for Autonomous Str
 | **Phase 5** | Baseline evaluation (Precision, Recall, F1, Latency) | **Completed** |
 | **Phase 6** | StreamAD comparison detectors (xStream, HSTree, RRCF) | **Completed** |
 | **Phase 7** | Anomaly event Kafka pipeline & context builder | **Completed** |
-| **Phase 8** | LangGraph agent state machine & decision node | Pending |
+| **Phase 8** | LangGraph agent state machine & decision node | **Completed** |
 | **Phase 9** | Agent analytical tools & vector memory | Pending |
 | **Phase 10** | Autonomous detector/analysis selection logic | Pending |
 | **Phase 11** | Database storage & Grafana dashboard provisioning | Pending |
@@ -123,10 +123,14 @@ Track the development lifecycle for **An Agentic AI Framework for Autonomous Str
 - [x] Unit test verifying pipeline anomaly integration (`tests/unit/test_streaming_pipeline_anomaly.py`).
 
 ### Phase 8: LangGraph Agent Core
-- [ ] Define LangGraph agent state graph and decision nodes.
-- [ ] System prompt design enforcing predefined action space:
-  - `NO_ACTION`, `INVESTIGATE`, `CHECK_DRIFT`, `COMPARE_DETECTORS`, `RUN_ALTERNATIVE_DETECTOR`, `REQUEST_DEEP_ANALYSIS`.
-- [ ] Deterministic LLM interaction with timeout and retry handling.
+- [x] Defined strongly typed AgentState (`src/agentic_streaming/agent/state.py` and `agent/state.py`) and closed action enum `AgentAction` (`NO_ACTION`, `INVESTIGATE`, `CHECK_DRIFT`, `COMPARE_DETECTORS`, `RUN_ALTERNATIVE_DETECTOR`, `REQUEST_DEEP_ANALYSIS`).
+- [x] Structured system prompts and JSON schema enforcement (`src/agentic_streaming/agent/prompts.py` and `agent/prompts.py`).
+- [x] Implemented AgentPlanner node (`src/agentic_streaming/agent/planner.py` and `agent/planner.py`) for contextual profiling and reasoning.
+- [x] Implemented AgentValidator node (`src/agentic_streaming/agent/validator.py` and `agent/validator.py`) enforcing Pydantic validation, single retry on invalid LLM JSON, and deterministic severity-based fallback.
+- [x] Implemented StreamingAgentWorkflow state machine (`src/agentic_streaming/agent/graph.py` and `agent/graph.py`) connecting:
+  `START -> Profile -> Plan -> Select Action -> Execute Tool -> Validate -> Store Memory -> END`.
+- [x] Strict security enforcement: 0 arbitrary code execution, 0 shell tools, 0 raw credentials.
+- [x] Complete unit test suite (`tests/unit/test_agent.py`) verifying state machine, validation retries, fallback mechanics, and action space constraints. All tests passing.
 
 ### Phase 9: Agent Tools & Episodic Memory
 - [ ] Controlled tools: `calculate_statistics`, `check_drift`, `run_xstream`, `run_hstree`, `run_rrcf`, `compare_detectors`.

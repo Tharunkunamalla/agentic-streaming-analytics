@@ -1,9 +1,7 @@
-"""Data models for detected anomaly events emitted over Kafka anomaly-events topic."""
-
 from datetime import datetime, timezone
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 from uuid import uuid4
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 
 class AnomalyEvent(BaseModel):
@@ -49,8 +47,48 @@ class AnomalyEvent(BaseModel):
         default_factory=dict,
         description="First-stage detector operational health metrics (throughput, latency, memory)",
     )
+    recent_window: List[float] = Field(
+        default_factory=list,
+        description="Recent metric values for agentic context analysis",
+    )
 
-    # Convenience aliases for backwards compatibility
+    @field_validator("timestamp", mode="before")
+    @classmethod
+    def parse_timestamp(cls, v: Any) -> float:
+        if isinstance(v, datetime):
+            return float(v.timestamp())
+        return float(v)
+
+    @model_validator(mode="before")
+    @classmethod
+    def pre_root_populate(cls, data: Any) -> Any:
+        if isinstance(data, dict):
+            feat = dict(data.get("features", {}))
+            if "metric_id" in data and "metric_id" not in feat:
+                feat["metric_id"] = data.pop("metric_id")
+            if "value" in data and "value" not in feat:
+                feat["value"] = data.pop("value")
+            if "ground_truth" in data and "ground_truth" not in feat:
+                feat["ground_truth"] = data.pop("ground_truth")
+            data["features"] = feat
+
+            summary = dict(data.get("recent_window_summary", {}))
+            if "window_mean" in data and "rolling_mean" not in summary:
+                summary["rolling_mean"] = data.pop("window_mean")
+            if "window_std" in data and "rolling_std" not in summary:
+                summary["rolling_std"] = data.pop("window_std")
+            data["recent_window_summary"] = summary
+
+            if "detector_name" in data and "detector" not in data:
+                data["detector"] = data.pop("detector_name")
+            else:
+                data.pop("detector_name", None)
+
+            data.pop("threshold", None)
+            data.pop("ground_truth_label", None)
+        return data
+
+    # Convenience properties for backwards compatibility
     @property
     def metric_id(self) -> str:
         return str(self.features.get("metric_id", "default"))
@@ -62,3 +100,15 @@ class AnomalyEvent(BaseModel):
     @property
     def detector_name(self) -> str:
         return self.detector
+
+    @property
+    def threshold(self) -> float:
+        return 0.50
+
+    @property
+    def window_mean(self) -> float:
+        return float(self.recent_window_summary.get("rolling_mean", 0.0))
+
+    @property
+    def window_std(self) -> float:
+        return float(self.recent_window_summary.get("rolling_std", 1.0))
