@@ -4,6 +4,7 @@ datasources:
   - name: SQLite_Analytics
     type: frser-sqlite-datasource
     access: proxy
-    url: /var/lib/grafana/data/streaming_analytics.db
+    jsonData:
+      path: /var/lib/grafana/data/streaming_analytics.db
     isDefault: true
     editable: true
