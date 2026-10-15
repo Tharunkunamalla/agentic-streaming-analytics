@@ -1,0 +1,9 @@
+{
+  "records_processed": 5070,
+  "malformed_record_count": 0,
+  "windows_computed": 5070,
+  "processing_timestamp": "2026-10-09T18:16:47.960120+00:00",
+  "current_window": "N/A",
+  "throughput_events_per_sec": 3.88,
+  "uptime_seconds": 2083.08
+}
