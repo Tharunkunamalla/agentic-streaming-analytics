@@ -41,7 +41,7 @@ docker ps
 
 ### Access URLs:
 - **Grafana Dashboard**: [http://localhost:3000](http://localhost:3000) (User: `admin` | Password: `admin`)
-- **Kafka UI**: [http://localhost:8080](http://localhost:8080)
+- **Kafka UI**: [http://localhost:8085](http://localhost:8085) (Port 8085 avoids local 8080 port conflicts)
 - **PostgreSQL**: `localhost:5432` (`streaming_analytics` / `postgrespassword`)
 
 ---
