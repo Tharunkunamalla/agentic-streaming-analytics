@@ -260,7 +260,7 @@ python scripts/check_env.py
 
 ---
 
-## 📑 Project Report & Documentation
+## 📑 Project Report & Commands guide
 
 Comprehensive documentation has been prepared and formatted for project reviews, capstone evaluations, and academic presentations:
 
