@@ -57,12 +57,26 @@ python scripts/run_continuous_stream.py
 
 ### Customizing Continuous Stream Options:
 ```powershell
-# Stream faster (e.g., 5 events per second)
+# 1. Default run with AADS (Fastest: ~2,611 events/sec | ~0.36 ms latency)
+python scripts/run_continuous_stream.py
+
+# 2. Run with HSTree detector (~507 events/sec | ~1.94 ms latency)
+python scripts/run_continuous_stream.py --detector HSTree
+
+# 3. Run with RRCF detector (~45 events/sec | ~22.19 ms latency)
+python scripts/run_continuous_stream.py --detector RRCF
+
+# 4. Stream faster (e.g., 5 events per second)
 python scripts/run_continuous_stream.py --rate 5.0
 
-# Increase or decrease anomaly probability (e.g., 30% chance of spikes)
+# 5. Increase anomaly probability (e.g., 30% chance of spikes)
 python scripts/run_continuous_stream.py --rate 2.0 --anomaly-prob 0.30
 ```
+> **Detector Performance Profile:**
+> - **AADS:** ~2,611 events/sec | Latency: **0.36 ms** (Default online baseline)
+> - **HSTree:** ~507 events/sec | Latency: **1.94 ms** (Streaming isolation tree)
+> - **RRCF:** ~45 events/sec | Latency: **22.19 ms** (Random cut forest ensemble)
+>
 > Press `Ctrl + C` in the terminal at any time to pause or stop the stream.
 
 ---

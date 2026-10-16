@@ -222,6 +222,29 @@ python scripts/run_continuous_stream.py
 ```
 
 > **Live View:** Open [http://localhost:3000](http://localhost:3000) to see the live metrics graph scrolling, anomaly spikes marked with colored alerts, and agent action audit logs updating automatically!
+> The **Active Detector** card in Grafana will dynamically reflect the running detector.
+
+### 🔄 Switching the Active Streaming Detector
+
+You can run the live stream with any of the supported online benchmark models:
+
+```powershell
+# 1. Default AADS (High-Speed Baseline: ~2,611 eps | 0.36 ms latency)
+python scripts/run_continuous_stream.py
+
+# 2. Run with HSTree (~507 eps | 1.94 ms latency)
+python scripts/run_continuous_stream.py --detector HSTree
+
+# 3. Run with RRCF (~45 eps | 22.19 ms latency)
+python scripts/run_continuous_stream.py --detector RRCF
+```
+
+| Model / Detector | Method | Throughput | Mean Latency | Primary Operational Role |
+| :--- | :--- | :---: | :---: | :--- |
+| **AADS (Default)** | Dynamic Micro-Clustering & Density | **~2,611 eps** | **0.36 ms** | First-stage continuous gatekeeper (fastest, lowest resource usage) |
+| **HSTree** | Streaming Half-Space Isolation Trees | **~507 eps** | **1.94 ms** | Tree-based online comparison detector |
+| **RRCF** | Robust Random Cut Forest | **~45 eps** | **22.19 ms** | High-recall displacement verification (used for consensus triage) |
+
 
 ---
 
