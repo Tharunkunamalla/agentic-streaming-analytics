@@ -115,8 +115,6 @@ agentic-streaming-analytics/
 ├── pyproject.toml                 # Packaging & Pytest config
 ├── COMMANDS_GUIDE.md              # Complete operational terminal run guide
 ├── PROJECT_REPORT.md              # Comprehensive academic & technical report
-├── PROJECT_REPORT.pdf             # Formatted, publication-ready PDF report
-├── PROJECT_REPORT.html            # Interactive HTML report with print styling
 ├── PHASES.md                      # 15-phase implementation lifecycle roadmap
 │
 ├── config/
@@ -260,7 +258,7 @@ python scripts/check_env.py
 
 ---
 
-## 📑 Project Report & Commands guide
+## 📑 Project Report & Commands Guide
 
 Comprehensive documentation has been prepared and formatted for project reviews, capstone evaluations, and academic presentations:
 
