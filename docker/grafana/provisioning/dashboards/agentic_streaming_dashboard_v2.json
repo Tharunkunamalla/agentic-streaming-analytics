@@ -432,12 +432,12 @@
                   "index": 0
                 },
                 "2": {
-                  "text": "Random Cut Forest",
+                  "text": "RRCF",
                   "color": "green",
                   "index": 1
                 },
                 "3": {
-                  "text": "HSTrees",
+                  "text": "HSTree",
                   "color": "purple",
                   "index": 2
                 }
@@ -454,8 +454,8 @@
             "uid": "SQLite_Analytics"
           },
           "refId": "A",
-          "rawQueryText": "SELECT CASE WHEN (SELECT active_detector FROM agent_decisions ORDER BY timestamp DESC LIMIT 1) = 'AADS' THEN 1 WHEN (SELECT active_detector FROM agent_decisions ORDER BY timestamp DESC LIMIT 1) LIKE '%Random Cut%' THEN 2 ELSE 1 END as value;",
-          "queryText": "SELECT CASE WHEN (SELECT active_detector FROM agent_decisions ORDER BY timestamp DESC LIMIT 1) = 'AADS' THEN 1 WHEN (SELECT active_detector FROM agent_decisions ORDER BY timestamp DESC LIMIT 1) LIKE '%Random Cut%' THEN 2 ELSE 1 END as value;",
+          "rawQueryText": "SELECT CASE WHEN (SELECT detector FROM detections ORDER BY timestamp DESC LIMIT 1) = 'HSTree' THEN 3 WHEN (SELECT detector FROM detections ORDER BY timestamp DESC LIMIT 1) IN ('RRCF', 'Random Cut Forest') THEN 2 ELSE 1 END as value;",
+          "queryText": "SELECT CASE WHEN (SELECT detector FROM detections ORDER BY timestamp DESC LIMIT 1) = 'HSTree' THEN 3 WHEN (SELECT detector FROM detections ORDER BY timestamp DESC LIMIT 1) IN ('RRCF', 'Random Cut Forest') THEN 2 ELSE 1 END as value;",
           "queryType": "table",
           "timeColumns": []
         }
