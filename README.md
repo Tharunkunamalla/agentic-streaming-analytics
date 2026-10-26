@@ -360,7 +360,7 @@ RRCF         |   1.54%   | 100.00%  |   3.03%  | 98.721%  |    45.0 eps  | 22.19
 - **Tharun Kunamalla** - Architecture, Streaming Pipeline, and Agentic Self-Healing Design
 - **Siva Sai Boggu** - Agent Design, and Self-Healing Agent Implementation 
 - **Venkat Chiranjeevi Reddy** - Data Collection and Stream generation for evaluation purpose.
-- **Yashwanth Sai Bhupalam** - Dashboard creation and Visualization of the results.
+- **Yaswanth Sai Bhupalam** - Dashboard creation and Visualization of the results.
 
 ---
 
